@@ -10,16 +10,18 @@ def getJsonContent( response ):
     return json.loads( response.content.decode('utf-8') )
 
 def logout():
+    global auth_token
     if auth_token is None:
         raise Exception( "not logged in." )
     r = requests.delete(api_url + "/sign_out.json", data = { "auth_token":auth_token } )
     content = getJsonContent( r )
     if "notice" in content.keys():
         print( content["notice"] )
-    global auth_token = None
-    global user_email = None
+    auth_token = None
+    user_email = None
 
 def login():
+    global auth_token
     if auth_token is not None:
         raise Exception( "already logged in as " + user_email + ". Use logout() to logout before logging in again" )
     user_email = input( "enter your email: " )
