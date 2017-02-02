@@ -1,0 +1,9 @@
+# Mac OS X
+.DS_Store
+
+#python
+*.egg-info/
+*.pyc
+_pycache_
+dist/
+build/
