@@ -4,9 +4,9 @@ if sys.version_info < (3,0):
 
 from setuptools import setup, find_packages
 setup(
-    name = "photosynq-py",
+    name = "photosynq_py",
     version = "0.1",
-    packages = ['photosynq-py'],
+    packages = ['photosynq_py'],
     test_suite = 'tests',
 
     # Project uses reStructuredText, so ensure that the docutils get
