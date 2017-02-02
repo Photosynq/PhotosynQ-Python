@@ -16,8 +16,8 @@ def logout():
     content = getJsonContent( r )
     if "notice" in content.keys():
         print( content["notice"] )
-    auth_token = None
-    user_email = None
+    global auth_token = None
+    global user_email = None
 
 def login():
     if auth_token is not None:
