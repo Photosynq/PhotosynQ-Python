@@ -20,7 +20,7 @@ pip install git+https://github.com/Photosynq/PhotosynQ-Python.git
 ***
 
 ### Getting started
-* A user account for [PhotosynQ] is required to access data. 
+* A user account for **[PhotosynQ]** is required to access data. 
 * We recommend using **[Jupyter]** to edit and run python code.
 * Project info and data will be retrieved in the form of json strings, in later versions a function will be provided to convert project data into a convenient **[DataFrame]**, similar to the **[PhotosynQ R package]**
 
