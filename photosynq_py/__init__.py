@@ -1,6 +1,7 @@
 import requests
 import getpass
 import json
+import pandas
 
 api_url = "https://photosynq.org/api/v3/"
 user_email = None
@@ -54,16 +55,16 @@ def getProjectInfo( projectId ):
     content = getJsonContent( r )
     return content["project"];
     
-def getProjectData( projectId ):
+def getProjectData( projectId, include_raw_data = False ):
     if auth_token is None:
         raise Exception( "not logged in." )
-    r = requests.get(api_url + "/projects/" + str(projectId) + "/data.json?user_email=" + user_email + "&user_token=" + auth_token + "&upd=true" )
+    r = requests.get(api_url + "/projects/" + str(projectId) + "/data.json?user_email=" + user_email + "&user_token=" + auth_token + "&upd=true&include_raw_data=" + str(include_raw_data) )
     content = getJsonContent( r )
     return content["data"];
         
-def getProjectDataFrame( projectId ):
+def getProjectDataFrame( projectId, include_raw_data = False  ):
     project_info = getProjectInfo( projectId )
-    project_data = getProjectData( projectId )
+    project_data = getProjectData( projectId, include_raw_data )
     return buildProjectDataFrame( project_info, project_data )
     
 def buildProjectDataFrame( project_info, project_data ):
@@ -241,4 +242,4 @@ def buildProjectDataFrame( project_info, project_data ):
             newKey = protocols[str(protocol)]["name"]
             spreadsheet[newKey] = spreadsheet.pop(protocol)
     
-    return(spreadsheet)
+    return(pandas.DataFrame.from_dict( spreadsheet ) )

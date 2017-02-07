@@ -22,36 +22,37 @@ pip install git+https://github.com/Photosynq/PhotosynQ-Python.git
 ### Getting started
 * A user account for **[PhotosynQ]** is required to access data. 
 * We recommend using **[Jupyter]** to edit and run python code.
-* Project info and data will be retrieved in the form of json strings, in later versions a function will be provided to convert project data into a convenient **[DataFrame]**, similar to the **[PhotosynQ R package]**
 
-
+#### Standard usage
+Retrieve project data and meta-data in a convenient **[DataFrame]**
 ```py
 import photosynq_py as ps
-```
 
-#### Login (you will be promted to enter your photosynq account information)
-```py
-ps.login()
-```
+# use your photosynq account to login (you will be prompted for your password)
+email = "john.doe@domain.com"
+ps.login( email )
 
-#### Get Project Information
-```py
+# retrieve a dataframe with data from the given project ID
 projectId = 1224
-info = getProjectInfo( projectId )
+df = ps.getProjectDataFrame( projectId, include_raw_data = False )
+
+# logout
+ps.logout();
 ```
 
-#### Get Project Data
+#### Other Functions
+
+Advanced users can retrieve project data and meta-data/info separately, as **[json]** strings.
+
+`getProjectInfo` and `getProjectData` (below) are components of `getProjectDataFrame` (above)
 ```py
+ps.login( "john.doe@domain.com" )
 projectId = 1224
-data = getProjectData( projectId )
-```
-
-#### Logout
-```py
+info = ps.getProjectInfo( projectId )
+data = ps.getProjectData( projectId, include_raw_data = False )
 ps.logout()
 ```
-
-
+[DataFrame]: http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html "DataFrame"
 
 [PhotosynQ]: https://photosynq.org "PhotosynQ"
 
@@ -64,3 +65,5 @@ ps.logout()
 [DataFrame]: http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html "DataFrame"
 
 [PhotosynQ R package]: https://github.com/Photosynq/PhotosynQ-R "PhotosynQ R package"
+
+[json]: http://www.json.org/ "json"
