@@ -6,6 +6,13 @@ api_url = "https://photosynq.org/api/v3/"
 user_email = None
 auth_token = None
 
+def unique(seq, keepstr=True):
+    t = type(seq)
+    if t==str:
+        t = (list, ''.join)[bool(keepstr)]
+    seen = []
+    return t(c for c in seq if not (c in seen or seen.append(c)))
+  
 def getJsonContent( response ):
     return json.loads( response.content.decode('utf-8') )
 
@@ -70,10 +77,10 @@ def buildProjectDataFrame( project_info, project_data ):
     # and generate a lookup table
     protocols = {}
     for protocol in project_info["protocols"]:
-        protocols[str(protocol["id"])] = { "name": protocol["name"], parameters: [], "count": 0 }
+        protocols[str(protocol["id"])] = { "name": protocol["name"], "parameters": [], "count": 0 }
     
     # Add counter for custom data
-    protocols["custom"] = { "name":"Imported Data (Custom Data)", parameters:[], "count":0 }
+    protocols["custom"] = { "name":"Imported Data (Custom Data)", "parameters":[], "count":0 }
     
     # Now we work on the actual data
     for sampleindex in project_data:
@@ -152,7 +159,7 @@ def buildProjectDataFrame( project_info, project_data ):
             spreadsheet[p][a] = [1]
     
         # Add the protocol to the list
-        for i in range( 1, len(protocols[p]["parameters"])):
+        for i in range(len(protocols[p]["parameters"])):
             if not str(protocols[p]["parameters"][i]) in ToExclude:
                 spreadsheet[p][str(protocols[p]["parameters"][i])] = [1]
     
@@ -172,7 +179,7 @@ def buildProjectDataFrame( project_info, project_data ):
                     spreadsheet[protocolID]["datum_id"] = [ spreadsheet[protocolID]["datum_id"], measurement["datum_id"] ]
                         
                 elif param == "time":
-                    time <- as.POSIXlt( ( as.numeric(prot[[toString(param)]]) / 1000 ), origin="1970-01-01" )
+                    time = prot[str(param)]# as.POSIXlt( ( as.numeric(prot[str(param)]) / 1000 ), origin="1970-01-01" )
                     spreadsheet[protocolID]["time"] = [ spreadsheet[protocolID]["time"], str(time) ]
                         
                 elif param == "user_id":
@@ -193,40 +200,26 @@ def buildProjectDataFrame( project_info, project_data ):
                 elif param == "status":
                     spreadsheet[protocolID]["status"] = [ spreadsheet[protocolID]["status"], str(measurement["status"]) ]
     
-                elif substr(param,0,7) == "answer_":
-                    answer <- strsplit(param,"_")[[1]][2]
-                    spreadsheet[protocolID][param]] = [spreadsheet[protocolID][param], measurement["user_answers"][str(answer)] ]
+                elif param.startswith( "answer_" ):
+                    answer = param.split( "_" )[1]
+                    spreadsheet[protocolID][param] = [spreadsheet[protocolID][param], measurement["user_answers"][str(answer)] ]
     
-                elif is.atomic(prot[[str(param)]]):
-                    spreadsheet[protocolID][param] = [ spreadsheet[protocolID][param], str(prot[str(param)])]
+                elif not ( type(prot[str(param)]) is dict or type(prot[str(param)]) is list ):
+                    spreadsheet[protocolID][param] = [ spreadsheet[protocolID][param], str(prot[str(param)]) ]
                 else:
                     spreadsheet[protocolID][param] = [ spreadsheet[protocolID][param], prot[str(param)]]
-            }
     
-        }
-    
-    }
-    
-    # Stupid, but we have to do this to remove the first row
-    for(protocol in names(spreadsheet)){
-        ii <- 1
-        for(parameter in names(spreadsheet[[protocol]])){
-            len <- length(spreadsheet[[protocol]][[parameter]])
-            spreadsheet[[protocol]][[parameter]] <- spreadsheet[[protocol]][[parameter]] [2:len]
-    
-            if(!is.null(answers[[parameter]])){
-                names(spreadsheet[[protocol]])[ii] <- answers[[parameter]]
-            }
-            ii <- ii + 1
-        }
-    }
-    
-    i <- 1
-    for(protocol in names(spreadsheet)){
-        if(!is.null(protocols[[toString(protocol)]]$name)){
-            names(spreadsheet)[i] <- protocols[[toString(protocol)]]$name
-        }
-        i <- i + 1
-    }
+    # we have to do this to remove the first row
+    for protocol in spreadsheet.keys():
+        for parameter in spreadsheet[protocol].keys():
+            length = len(spreadsheet[protocol][parameter])
+            spreadsheet[protocol][parameter] = spreadsheet[protocol][parameter][1:length]
+            if not answers[parameter] is None:
+                newKey = answers[parameter]
+                spreadsheet[protocol][newKey] = spreadsheet[protocol].pop(parameter)
+    for protocol in spreadsheet.keys():
+        if not protocols[[str(protocol)]]["name"] is None:
+            newKey = protocols[str(protocol)]["name"]
+            spreadsheet[newKey] = spreadsheet.pop(protocol)
     
     return(spreadsheet)
