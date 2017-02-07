@@ -28,12 +28,15 @@ def logout():
     auth_token = None
     user_email = None
 
-def login():
+def login( u_email = None ):
     global auth_token
     global user_email
     if auth_token is not None:
         raise Exception( "already logged in as " + user_email + ". Use logout() to logout before logging in again" )
-    user_email = input( "enter your email: " )
+    if u_email is None:
+        user_email = input( "enter your email: " )
+    else:
+        user_email = u_email
     password = getpass.getpass( "enter your password: " )
     r = requests.post( api_url + "/sign_in.json", data = { "user[email]":user_email,"user[password]":password } )
     if r.status_code == 500:
@@ -47,17 +50,22 @@ def login():
 def getProjectInfo( projectId ):
     if auth_token is None:
         raise Exception( "not logged in." )
-    r = requests.get(api_url + "/projects/" + str(projectId) + ".json", data = { "user_token":auth_token, "user_email":user_email } )
+    r = requests.get(api_url + "/projects/" + str(projectId) + ".json?user_email=" + user_email + "&user_token=" + auth_token )
     content = getJsonContent( r )
-    return content;
+    return content["project"];
     
 def getProjectData( projectId ):
     if auth_token is None:
         raise Exception( "not logged in." )
-    r = requests.get(api_url + "/projects/" + str(projectId) + "/data.json", data = { "user_token":auth_token, "user_email":user_email, "upd":True } )
+    r = requests.get(api_url + "/projects/" + str(projectId) + "/data.json?user_email=" + user_email + "&user_token=" + auth_token + "&upd=true" )
     content = getJsonContent( r )
-    return content;
+    return content["data"];
         
+def getProjectDataFrame( projectId ):
+    project_info = getProjectInfo( projectId )
+    project_data = getProjectData( projectId )
+    return buildProjectDataFrame( project_info, project_data )
+    
 def buildProjectDataFrame( project_info, project_data ):
     if project_info is None:
         raise Exception( "Project info missing" )
@@ -122,7 +130,10 @@ def buildProjectDataFrame( project_info, project_data ):
             for filters in project_info["filters"]:
                 answers["answer_"+str(filters["id"])] = filters["label"]
     
-            protocols[str(sampleprotocol["protocol_id"])]["parameters"] = [protocols[str(sampleprotocol["protocol_id"])]["parameters"], sampleprotocol.keys()]
+            protocolkey = str(sampleprotocol["protocol_id"])
+            if not protocolkey in protocols.keys():
+                protocols[protocolkey] = { "parameters": None }
+            protocols[protocolkey]["parameters"] = [protocols[protocolkey]["parameters"], sampleprotocol.keys()]
     
             # Add Dummy for unknown protocols
             if not str(sampleprotocol["protocol_id"]) in protocols.keys():
@@ -160,8 +171,9 @@ def buildProjectDataFrame( project_info, project_data ):
     
         # Add the protocol to the list
         for i in range(len(protocols[p]["parameters"])):
-            if not str(protocols[p]["parameters"][i]) in ToExclude:
-                spreadsheet[p][str(protocols[p]["parameters"][i])] = [1]
+            newKey = str(protocols[p]["parameters"][i])
+            if not newKey in ToExclude:
+                spreadsheet[p][newKey] = [1]
     
         spreadsheet[p]["user_id"] = [1]
         spreadsheet[p]["device_id"] = [1]
@@ -173,52 +185,59 @@ def buildProjectDataFrame( project_info, project_data ):
     for measurement in project_data:
         for prot in measurement["sample"]:
             protocolID = str(prot["protocol_id"])
-            for param in spreadsheet["protocolID"].keys():
+            
+            for param in spreadsheet[protocolID].keys():
     
                 if param == "datum_id":
-                    spreadsheet[protocolID]["datum_id"] = [ spreadsheet[protocolID]["datum_id"], measurement["datum_id"] ]
+                    spreadsheet[protocolID]["datum_id"].append( measurement["datum_id"] )
                         
                 elif param == "time":
                     time = prot[str(param)]# as.POSIXlt( ( as.numeric(prot[str(param)]) / 1000 ), origin="1970-01-01" )
-                    spreadsheet[protocolID]["time"] = [ spreadsheet[protocolID]["time"], str(time) ]
+                    spreadsheet[protocolID]["time"].append( str(time) )
                         
                 elif param == "user_id":
-                    spreadsheet[protocolID]["user_id"] = [ spreadsheet[protocolID]["user_id"], str(measurement["user_id"]) ]
+                    spreadsheet[protocolID]["user_id"].append( str(measurement["user_id"]) )
                         
                 elif param == "device_id":
-                    spreadsheet[protocolID]["device_id"] = [ spreadsheet[protocolID]["device_id"], str(measurement["device_id"]) ]
+                    spreadsheet[protocolID]["device_id"].append( str(measurement["device_id"]) )
                           
                 elif param == "longitude":
-                    spreadsheet[protocolID]["longitude"] = [ spreadsheet[protocolID]["longitude"], str(measurement["location"][1]) ]                                                        
+                    spreadsheet[protocolID]["longitude"].append( str(measurement["location"][0]) )                                                   
     
                 elif param == "latitute":
-                    spreadsheet[protocolID]["latitute"] = [ spreadsheet[protocolID]["latitute"], str(measurement["location"][2]) ]
+                    spreadsheet[protocolID]["latitute"].append( str(measurement["location"][1]) )
     
                 elif param == "notes":
-                    spreadsheet[protocolID]["notes"] = [ spreadsheet[protocolID]["notes"], str(measurement["note"]) ]
+                    noteValue = None
+                    if "note" in measurement.keys():
+                        noteValue = measurement["note"]
+                    spreadsheet[protocolID]["notes"].append( str(noteValue) )
     
                 elif param == "status":
-                    spreadsheet[protocolID]["status"] = [ spreadsheet[protocolID]["status"], str(measurement["status"]) ]
+                    spreadsheet[protocolID]["status"].append( str(measurement["status"]) )
     
                 elif param.startswith( "answer_" ):
-                    answer = param.split( "_" )[1]
-                    spreadsheet[protocolID][param] = [spreadsheet[protocolID][param], measurement["user_answers"][str(answer)] ]
+                    answer_index = param.split( "_" )[1]
+                    answer = None
+                    if answer_index in measurement["user_answers"].keys():
+                        answer = measurement["user_answers"][answer_index]
+                    spreadsheet[protocolID][param].append( answer )
     
-                elif not ( type(prot[str(param)]) is dict or type(prot[str(param)]) is list ):
-                    spreadsheet[protocolID][param] = [ spreadsheet[protocolID][param], str(prot[str(param)]) ]
-                else:
-                    spreadsheet[protocolID][param] = [ spreadsheet[protocolID][param], prot[str(param)]]
+#                elif not ( type(prot[str(param)]) is dict or type(prot[str(param)]) is list ):
+#                    spreadsheet[protocolID][param] = [ spreadsheet[protocolID][param], str(prot[str(param)]) ]
+#                else:
+                    # spreadsheet[protocolID][param] = [ spreadsheet[protocolID][param], str(prot[str(param)]) ]
     
     # we have to do this to remove the first row
     for protocol in spreadsheet.keys():
         for parameter in spreadsheet[protocol].keys():
             length = len(spreadsheet[protocol][parameter])
             spreadsheet[protocol][parameter] = spreadsheet[protocol][parameter][1:length]
-            if not answers[parameter] is None:
+            if parameter in answers.keys():
                 newKey = answers[parameter]
                 spreadsheet[protocol][newKey] = spreadsheet[protocol].pop(parameter)
     for protocol in spreadsheet.keys():
-        if not protocols[[str(protocol)]]["name"] is None:
+        if "name" in protocols[str(protocol)].keys():
             newKey = protocols[str(protocol)]["name"]
             spreadsheet[newKey] = spreadsheet.pop(protocol)
     
