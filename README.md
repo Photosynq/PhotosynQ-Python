@@ -44,12 +44,13 @@ ps.logout();
 
 Advanced users can retrieve project data and meta-data/info separately, as **[json]** strings.
 
-`getProjectInfo` and `getProjectData` (below) are components of `getProjectDataFrame` (above)
+`getProjectInfo`, `getProjectData` and `buildProjectDataFrame` (below) are components of `getProjectDataFrame` (above)
 ```py
 ps.login( "john.doe@domain.com" )
 projectId = 1224
 info = ps.getProjectInfo( projectId )
 data = ps.getProjectData( projectId, include_raw_data = False )
+df = ps.buildProjectDataFrame( info, data )
 ps.logout()
 ```
 [DataFrame]: http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html "DataFrame"
