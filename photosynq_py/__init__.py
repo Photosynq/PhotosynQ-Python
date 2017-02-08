@@ -134,8 +134,14 @@ def buildProjectDataFrame( project_info, project_data ):
             protocolkey = str(sampleprotocol["protocol_id"])
             if not protocolkey in protocols.keys():
                 protocols[protocolkey] = { "parameters": None }
-            protocols[protocolkey]["parameters"] = [protocols[protocolkey]["parameters"], sampleprotocol.keys()]
-    
+
+            # protocols[[protocol_key]]$parameters <- c(protocols[[protocol_key]]$parameters, names(sampleprotocol))
+            if (not "parameters" in protocols[protocolkey].keys()) or ( protocols[protocolkey]["parameters"] is None ):
+                protocols[protocolkey]["parameters"] = []
+            for key in sampleprotocol.keys():
+                if not key in protocols[protocolkey]["parameters"]:
+                    protocols[protocolkey]["parameters"].append( key )
+                      
             # Add Dummy for unknown protocols
             if not str(sampleprotocol["protocol_id"]) in protocols.keys():
                 protocols[str(sampleprotocol["protocol_id"])] = { "name": "Unknown Protocol (ID: " + sampleprotocol["protocol_id"] + ")", "parameters": [], "count": 0 }
@@ -223,11 +229,15 @@ def buildProjectDataFrame( project_info, project_data ):
                     if answer_index in measurement["user_answers"].keys():
                         answer = measurement["user_answers"][answer_index]
                     spreadsheet[protocolID][param].append( answer )
-    
-#                elif not ( type(prot[str(param)]) is dict or type(prot[str(param)]) is list ):
-#                    spreadsheet[protocolID][param] = [ spreadsheet[protocolID][param], str(prot[str(param)]) ]
-#                else:
-                    # spreadsheet[protocolID][param] = [ spreadsheet[protocolID][param], str(prot[str(param)]) ]
+                    
+                elif str(param) in prot.keys():
+                    if not param in spreadsheet[protocolID].keys():
+                        spreadsheet[protocolID][param] = []
+                    if type(prot[str(param)]) is list:
+                        for elem in prot[str(param)]:
+                            spreadsheet[protocolID][param].append( elem )
+                    else:
+                        spreadsheet[protocolID][param].append( prot[str(param)] )
     
     # we have to do this to remove the first row
     for protocol in spreadsheet.keys():
