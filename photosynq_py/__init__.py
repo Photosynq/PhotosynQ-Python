@@ -38,7 +38,7 @@ def login( u_email = None ):
         user_email = input( "enter your email: " )
     else:
         user_email = u_email
-    password = getpass.getpass( "enter your password: " )
+    password = getpass.getpass( "enter your PhotosynQ password for " + user_email + ": " )
     r = requests.post( api_url + "/sign_in.json", data = { "user[email]":user_email,"user[password]":password } )
     if r.status_code == 500:
         raise Exception( "invalid email/password combination" )
