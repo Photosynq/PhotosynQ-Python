@@ -1,17 +1,17 @@
 import sys
 if sys.version_info < (3,0):
     sys.exit('Sorry, Python < 3.0 is not supported')
-
+    
 from setuptools import setup, find_packages
 setup(
     name = "photosynq_py",
-    version = "0.7",
+    version = "0.8",
     packages = ['photosynq_py'],
     test_suite = 'tests',
 
     # Project uses reStructuredText, so ensure that the docutils get
     # installed or upgraded on the target machine
-    install_requires = ['numpy','pandas'],
+    install_requires = ['requests', 'getpass','json','pandas', 'datetime'],
 
     #package_data = {
     #    # If any package contains *.txt or *.rst files, include them:

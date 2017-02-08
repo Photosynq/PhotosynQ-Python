@@ -2,6 +2,7 @@ import requests
 import getpass
 import json
 import pandas
+import datetime
 
 api_url = "https://photosynq.org/api/v3/"
 user_email = None
@@ -203,7 +204,9 @@ def buildProjectDataFrame( project_info, project_data ):
                     spreadsheet[protocolID]["datum_id"].append( measurement["datum_id"] )
                         
                 elif param == "time":
-                    time = prot[str(param)]# as.POSIXlt( ( as.numeric(prot[str(param)]) / 1000 ), origin="1970-01-01" )
+                    time = datetime.datetime.fromtimestamp(int(prot[str(param)])/1000).strftime('%Y-%m-%d %H:%M:%S')
+                    # time <- as.POSIXlt( ( as.numeric(prot[str(param)]) / 1000 ), origin="1970-01-01" )
+                    
                     spreadsheet[protocolID]["time"].append( str(time) )
                         
                 elif param == "user_id":
@@ -257,5 +260,5 @@ def buildProjectDataFrame( project_info, project_data ):
         if str(protocol) in protocols.keys() and "name" in protocols[str(protocol)].keys():
             newKey = protocols[str(protocol)]["name"]
             spreadsheet[newKey] = spreadsheet.pop(protocol)
-    
+            
     return(pandas.DataFrame.from_dict( spreadsheet ) )
