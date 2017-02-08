@@ -204,7 +204,7 @@ def buildProjectDataFrame( project_info, project_data ):
                     spreadsheet[protocolID]["datum_id"].append( measurement["datum_id"] )
                         
                 elif param == "time":
-                    time = datetime.datetime.fromtimestamp(int(prot[str(param)])/1000).strftime('%Y-%m-%d %H:%M:%S')
+                    time = datetime.datetime.fromtimestamp(int(prot[str(param)])/1000).strftime('%m/%d/%Y, %H:%M:%S %p')
                     # time <- as.POSIXlt( ( as.numeric(prot[str(param)]) / 1000 ), origin="1970-01-01" )
                     
                     spreadsheet[protocolID]["time"].append( str(time) )
