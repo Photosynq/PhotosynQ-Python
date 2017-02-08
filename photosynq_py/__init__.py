@@ -190,6 +190,10 @@ def buildProjectDataFrame( project_info, project_data ):
         spreadsheet[p]["latitute"] = [1]
     
     for measurement in project_data:
+        
+        if not "location" in measurement.keys():
+            measurement["location"] = [None,None]
+        
         for prot in measurement["sample"]:
             protocolID = str(prot["protocol_id"])
             
