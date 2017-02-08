@@ -237,8 +237,9 @@ def buildProjectDataFrame( project_info, project_data ):
             if parameter in answers.keys():
                 newKey = answers[parameter]
                 spreadsheet[protocol][newKey] = spreadsheet[protocol].pop(parameter)
+                
     for protocol in spreadsheet.keys():
-        if "name" in protocols[str(protocol)].keys():
+        if str(protocol) in protocols.keys() and "name" in protocols[str(protocol)].keys():
             newKey = protocols[str(protocol)]["name"]
             spreadsheet[newKey] = spreadsheet.pop(protocol)
     
