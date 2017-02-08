@@ -237,11 +237,12 @@ def buildProjectDataFrame( project_info, project_data ):
                 elif str(param) in prot.keys():
                     if not param in spreadsheet[protocolID].keys():
                         spreadsheet[protocolID][param] = []
-                    if type(prot[str(param)]) is list:
-                        for elem in prot[str(param)]:
-                            spreadsheet[protocolID][param].append( elem )
-                    else:
-                        spreadsheet[protocolID][param].append( prot[str(param)] )
+                    spreadsheet[protocolID][param].append( prot[str(param)] )
+#                    if type(prot[str(param)]) is list:
+#                        for elem in prot[str(param)]:
+#                            spreadsheet[protocolID][param].append( elem )
+#                    else:
+#                        spreadsheet[protocolID][param].append( prot[str(param)] )
     
     # we have to do this to remove the first row
     for protocol in spreadsheet.keys():
