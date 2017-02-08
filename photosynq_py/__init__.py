@@ -36,7 +36,7 @@ def login( u_email = None ):
     if auth_token is not None:
         raise Exception( "already logged in as " + user_email + ". Use logout() to logout before logging in again" )
     if u_email is None:
-        user_email = input( "enter your email: " )
+        user_email = input( "enter your PhotosynQ account email: " )
     else:
         user_email = u_email
     password = getpass.getpass( "enter your PhotosynQ password for " + user_email + ": " )

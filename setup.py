@@ -5,7 +5,7 @@ if sys.version_info < (3,0):
 from setuptools import setup, find_packages
 setup(
     name = "photosynq_py",
-    version = "0.10",
+    version = "0.11",
     packages = ['photosynq_py'],
     test_suite = 'tests',
 
