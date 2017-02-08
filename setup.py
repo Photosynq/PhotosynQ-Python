@@ -11,7 +11,7 @@ setup(
 
     # Project uses reStructuredText, so ensure that the docutils get
     # installed or upgraded on the target machine
-    install_requires = ['requests', 'json','pandas', 'datetime'],
+    install_requires = ['requests','pandas'],
 
     #package_data = {
     #    # If any package contains *.txt or *.rst files, include them:
