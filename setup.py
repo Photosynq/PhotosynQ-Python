@@ -17,7 +17,7 @@ setup(
     #    # If any package contains *.txt or *.rst files, include them:
     #    '': ['*.txt', '*.rst'],
     #    # And include any *.msg files found in the 'hello' package, too:
-    #    'hello': ['*.msg'],
+    #    'hello': ['*msg'],
     #},
 
     # could also include long_description, download_url, classifiers, etc.
