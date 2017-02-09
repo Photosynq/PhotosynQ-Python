@@ -4,9 +4,11 @@ PhotosynQ | Python
 Truly Collaborative Plant Research
 ----------------------------------
 
-**[PhotosynQ]** helps you to make your plant research more efficient. For an advanced analysis, this package allows to pull data from projects right into **[Python]**.
+**[PhotosynQ]** helps you to make your plant research more efficient. For advanced analysis, this package allows you to pull data from projects right into **[Python]**.
 
 New python users should consider installing **[Anaconda]** which includes both the python interpreter and the **[Jupyter]**  python editor.
+
+For advanced users, we recommend using **[Spyder]** to edit and run python code. 
 
 ***
 
@@ -20,8 +22,7 @@ pip install git+https://github.com/Photosynq/PhotosynQ-Python.git
 ***
 
 ### Getting started
-* A user account for **[PhotosynQ]** is required to access data. 
-* We recommend using **[Jupyter]** to edit and run python code.
+* A user account on **[PhotosynQ]** is required
 
 #### Standard usage
 Retrieve project data and meta-data in a convenient **[DataFrame]**
@@ -68,3 +69,5 @@ ps.logout()
 [PhotosynQ R package]: https://github.com/Photosynq/PhotosynQ-R "PhotosynQ R package"
 
 [json]: http://www.json.org/ "json"
+
+[Spyder]: https://pythonhosted.org/spyder/ "Spyder, the Scientific PYthon Development EnviRonment"
