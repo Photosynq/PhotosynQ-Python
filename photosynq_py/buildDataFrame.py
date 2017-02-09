@@ -8,10 +8,12 @@ def getProjectDataFrame( projectId, include_raw_data = False  ):
     """
     Get a DataFrame for the given PhotosynQ project.
     
-    :param projectId: the ID number for the PhotosynQ project in question
+    This function calls :func:`~photosynq_py.getJson.getProjectInfo` and :func:`~photosynq_py.getJson.getProjectData`, and then combines the project info and data into one dataframe using :func:`~photosynq_py.buildDataFrame.buildProjectDataFrame`.
+    
+    :param projectId: the ID number for the PhotosynQ project to retrieve info and data from.
     :param include_raw_data: True if raw data should be requested and included in the result (default False)
-    :returns: a dataframe containing project info and data using :func:`~photosynq_py.buildDataFrame.buildProjectDataFrame`
-    :raises Exception: if the user is not logged in. (see :func:`~photosynq_py.auth.login`)
+    :returns: a dataframe containing project info and data, created by calling :func:`~photosynq_py.buildDataFrame.buildProjectDataFrame`
+    :raises Exception: if an I/O exception occurs or the user is not logged in. (see :func:`~photosynq_py.auth.login`)
     """
     project_info = getJson.getProjectInfo( projectId )
     project_data = getJson.getProjectData( projectId, include_raw_data )
@@ -19,6 +21,18 @@ def getProjectDataFrame( projectId, include_raw_data = False  ):
     
     
 def buildProjectDataFrame( project_info, project_data ):
+    """
+    Get a DataFrame for the given PhotosynQ project info and data.
+    
+    This function is intended for use within :func:`~photosynq_py.buildDataFrame.getProjectDataFrame`, or for advanced users that need to retrieve project info/data as a separate step.
+    
+    Normal users should use :func:`~photosynq_py.buildDataFrame.getProjectDataFrame` instead.
+    
+    :param project_info: the project info json, typically retrieved using :func:`~photosynq_py.getJson.getProjectInfo`
+    :param project_data: the project data json, normally retrieved using :func:`~photosynq_py.getJson.getProjectData`
+    :returns: a dataframe containing project info and data
+    :raises Exception: if the parameters are mismatched or malformed
+    """
     if project_info is None:
         raise Exception( "Project info missing" )
     if project_data is None:
