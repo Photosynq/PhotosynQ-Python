@@ -5,6 +5,14 @@ import photosynq_py.globalVars as gvars
 import photosynq_py.getJson as getJson
 
 def getProjectDataFrame( projectId, include_raw_data = False  ):
+    """
+    Get a DataFrame for the given PhotosynQ project.
+    
+    :param projectId: the ID number for the PhotosynQ project in question
+    :param include_raw_data: True if raw data should be requested and included in the result (default False)
+    :returns: a dataframe containing project info and data using :func:`~photosynq_py.buildDataFrame.buildProjectDataFrame`
+    :raises Exception: if the user is not logged in. (see :func:`~photosynq_py.auth.login`)
+    """
     project_info = getJson.getProjectInfo( projectId )
     project_data = getJson.getProjectData( projectId, include_raw_data )
     return buildProjectDataFrame( project_info, project_data )
