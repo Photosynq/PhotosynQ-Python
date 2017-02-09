@@ -1,12 +1,14 @@
 import pandas
 import datetime
 
-def unique(seq, keepstr=True):
-    t = type(seq)
-    if t==str:
-        t = (list, ''.join)[bool(keepstr)]
-    seen = []
-    return t(c for c in seq if not (c in seen or seen.append(c)))
+import photosynq_py.globalVars as gvars
+import photosynq_py.getJson as getJson
+
+def getProjectDataFrame( projectId, include_raw_data = False  ):
+    project_info = getJson.getProjectInfo( projectId )
+    project_data = getJson.getProjectData( projectId, include_raw_data )
+    return buildProjectDataFrame( project_info, project_data )
+    
     
 def buildProjectDataFrame( project_info, project_data ):
     if project_info is None:
@@ -202,3 +204,11 @@ def buildProjectDataFrame( project_info, project_data ):
             spreadsheet[newKey] = spreadsheet.pop(protocol)
             
     return(pandas.DataFrame.from_dict( spreadsheet ) )
+
+    
+def unique(seq, keepstr=True):
+    t = type(seq)
+    if t==str:
+        t = (list, ''.join)[bool(keepstr)]
+    seen = []
+    return t(c for c in seq if not (c in seen or seen.append(c)))
