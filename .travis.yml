@@ -1,0 +1,15 @@
+language: python
+  
+os:
+  - linux
+  - osx
+  
+python:
+  - "3.2"
+  - "3.3"
+  - "3.4"
+  # PyPy versions
+  - "pypy3"
+  
+# command to run tests
+script: test
