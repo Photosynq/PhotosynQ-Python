@@ -12,4 +12,4 @@ python:
   - "pypy3"
   
 # command to run tests
-script: setup.py test
+script: python setup.py test
