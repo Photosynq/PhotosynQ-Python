@@ -1,10 +1,12 @@
 PhotosynQ | Python
 =====================
 
+[![Build Status](https://travis-ci.org/Photosynq/PhotosynQ-Python.svg?branch=master)](https://travis-ci.org/Photosynq/PhotosynQ-Python)
+
 Truly Collaborative Plant Research
 ----------------------------------
 
-**[PhotosynQ]** helps you to make your plant research more efficient. For advanced analysis, this package allows you to pull data from projects right into **[Python]**.
+**[PhotosynQ]** helps you to make your plant research more efficient. For advanced analysis, this package allows you to pull data right into **[Python]**.
 
 New python users should consider installing **[Anaconda]** which includes both the python interpreter and the **[Jupyter]**  python editor.
 
