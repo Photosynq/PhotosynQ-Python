@@ -1,7 +1,6 @@
 import pandas
 import datetime
 
-import photosynq_py.globalVars as gvars
 import photosynq_py.getJson as getJson
 
 def getProjectDataFrame( projectId, include_raw_data = False  ):
@@ -204,7 +203,10 @@ def buildProjectDataFrame( project_info, project_data ):
                 elif str(param) in prot.keys():
                     if not param in spreadsheet[protocolID].keys():
                         spreadsheet[protocolID][param] = []
-                    spreadsheet[protocolID][param].append( prot[str(param)] )
+                    value = prot[str(param)]
+                    if value == 'NA':
+                        value = float('nan')
+                    spreadsheet[protocolID][param].append( value )
 #                    if type(prot[str(param)]) is list:
 #                        for elem in prot[str(param)]:
 #                            spreadsheet[protocolID][param].append( elem )

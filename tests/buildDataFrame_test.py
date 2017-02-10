@@ -23,14 +23,20 @@ class buildDataFrame_test(TestCase):
         # build a dataframe 
         builtDataFrame = ps.buildProjectDataFrame( testInfo, testData )
         
-        # compare the built dataframe to the one loaded from csv resource
+        # assert that built data frame "datum_id" values match the "ID" column in the csv
+        csvIds = list( csvDataFrame.index )
+        builtDatumIds = builtDataFrame['Leaf Photosynthesis MultispeQ V1.0']['datum_id']
+        self.assertListEqual( csvIds, builtDatumIds, "buildProjectDataFrame() result datum_ids do not match the ID column in tst resources csv" )
+        
+        # assert that each column in the csv exists in the built dataframe
         builtDataKeys = builtDataFrame['Leaf Photosynthesis MultispeQ V1.0'].keys()
         for csvColumnHeader in csvDataFrame.columns:
             if csvColumnHeader in ignorableCsvHeaders:
                 continue;
             self.assertIn( csvColumnHeader, builtDataKeys, "buildProjectDataFrame() result is missing header \"{0}\", which is present in test resources csv".format( csvColumnHeader ) )
             
-            csvColumnData =  list(csvDataFrame[csvColumnHeader])
+            # assert that this column's values match between the csv and the built dataframe
+            csvColumnData = list(csvDataFrame[csvColumnHeader])
             builtColumnData = builtDataFrame['Leaf Photosynthesis MultispeQ V1.0'][csvColumnHeader]
             self.assertListEqual( csvColumnData, builtColumnData, "buildProjectDataFrame() result \"{0}\" values do not match the corresponding column in the test resources csv".format( csvColumnHeader ) ) 
            
