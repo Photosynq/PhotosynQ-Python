@@ -10,7 +10,7 @@ def loadTestJson( file ):
         
 class buildDataFrame_test(TestCase):
     def test_buildDataFrame(self):
-        testdata = loadTestJson( "tests/testdata" )["data"]
-        testinfo = loadTestJson( "tests/testinfo" )["project"]
+        testdata = loadTestJson( "tests/resources/1224_data_from_api" )["data"]
+        testinfo = loadTestJson( "tests/resources/1224_info_from_api" )["project"]
         print( "testinfo.keys(): " + str(testinfo.keys()) )
         ps.buildProjectDataFrame( testinfo, testdata )
