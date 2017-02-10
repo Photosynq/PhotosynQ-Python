@@ -1,6 +1,8 @@
 from unittest import TestCase
 from pandas import DataFrame
+from numbers import Number
 import json
+import numpy
 
 import photosynq_py as ps
 
@@ -10,6 +12,7 @@ def loadTestJson( file ):
     return json.loads( result_bytes.decode('utf-8') )
         
 ignorableCsvHeaders = [ "Series", "Repeat" ]
+seriesDataColumns = [ "ECSt", "gH+", ]
     
 class buildDataFrame_test(TestCase):
     def test_buildDataFrame(self):
@@ -35,9 +38,13 @@ class buildDataFrame_test(TestCase):
                 continue;
             self.assertIn( csvColumnHeader, builtDataKeys, "buildProjectDataFrame() result is missing header \"{0}\", which is present in test resources csv".format( csvColumnHeader ) )
             
-            # assert that this column's values match between the csv and the built dataframe
+            # assert that this column's content match between the csv and the built dataframe
+            # if csvColumnHeader in seriesDataColumns:
+            print( "checcking series values in column " + csvColumnHeader )
             csvColumnData = list(csvDataFrame[csvColumnHeader])
             builtColumnData = builtDataFrame['Leaf Photosynthesis MultispeQ V1.0'][csvColumnHeader]
-            self.assertListEqual( csvColumnData, builtColumnData, "buildProjectDataFrame() result \"{0}\" values do not match the corresponding column in the test resources csv".format( csvColumnHeader ) ) 
-           
-            
+            if isinstance( csvColumnData[0], Number ):
+                numpy.testing.assert_array_almost_equal( csvColumnData, builtColumnData, err_msg="buildProjectDataFrame() result \"{0}\" numerical values do not match the corresponding column in the test resources csv".format( csvColumnHeader ) )
+            else:
+                csvColumnData = [None if x == 'null' else x for x in csvColumnData]
+                self.assertListEqual( csvColumnData, builtColumnData, "buildProjectDataFrame() result \"{0}\" values do not match the corresponding column in the test resources csv".format( csvColumnHeader ) )

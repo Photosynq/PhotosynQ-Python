@@ -1,5 +1,6 @@
-import pandas
-import datetime
+from pandas import DataFrame
+from numpy import nan
+from datetime import datetime
 
 import photosynq_py.getJson as getJson
 
@@ -167,10 +168,15 @@ def buildProjectDataFrame( project_info, project_data ):
                     spreadsheet[protocolID]["datum_id"].append( measurement["datum_id"] )
                         
                 elif param == "time":
-                    time = datetime.datetime.fromtimestamp(int(prot[str(param)])/1000).strftime('%m/%d/%Y, %H:%M:%S %p')
+                    unix_time = int(prot[str(param)])/1000
+                    time = datetime.utcfromtimestamp(unix_time).strftime('%m/%d/%Y, %H:%M:%S %p')
+                    spreadsheet[protocolID]["time"].append( str(time) )
+    
+                    # debug
+                    print( "converted unix time {0} to human-readable \"{1}\"".format( unix_time, time ) )
+                    
                     # time <- as.POSIXlt( ( as.numeric(prot[str(param)]) / 1000 ), origin="1970-01-01" )
                     
-                    spreadsheet[protocolID]["time"].append( str(time) )
                         
                 elif param == "user_id":
                     spreadsheet[protocolID]["user_id"].append( str(measurement["user_id"]) )
@@ -205,7 +211,7 @@ def buildProjectDataFrame( project_info, project_data ):
                         spreadsheet[protocolID][param] = []
                     value = prot[str(param)]
                     if value == 'NA':
-                        value = float('nan')
+                        value = nan
                     spreadsheet[protocolID][param].append( value )
 #                    if type(prot[str(param)]) is list:
 #                        for elem in prot[str(param)]:
@@ -227,7 +233,7 @@ def buildProjectDataFrame( project_info, project_data ):
             newKey = protocols[str(protocol)]["name"]
             spreadsheet[newKey] = spreadsheet.pop(protocol)
             
-    return(pandas.DataFrame.from_dict( spreadsheet ) )
+    return( DataFrame.from_dict( spreadsheet ) )
 
     
 def unique(seq, keepstr=True):
