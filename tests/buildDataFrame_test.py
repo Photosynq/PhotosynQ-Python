@@ -1,4 +1,5 @@
 from unittest import TestCase
+from pandas import DataFrame
 import json
 
 import photosynq_py as ps
@@ -10,7 +11,14 @@ def loadTestJson( file ):
         
 class buildDataFrame_test(TestCase):
     def test_buildDataFrame(self):
-        testdata = loadTestJson( "tests/resources/1224_data_from_api" )["data"]
-        testinfo = loadTestJson( "tests/resources/1224_info_from_api" )["project"]
-        print( "testinfo.keys(): " + str(testinfo.keys()) )
-        ps.buildProjectDataFrame( testinfo, testdata )
+        
+        # load test resources
+        resourceFolder = "tests/resources/"
+        testInfo = loadTestJson( resourceFolder + "1224_info_from_api" )["project"]
+        testData = loadTestJson( resourceFolder + "1224_data_from_api" )["data"]
+        expectedDataFrame = DataFrame.from_csv( resourceFolder + "1224_csv_from_website.csv" )
+
+        # build a dataframe 
+        builtDataFrame = ps.buildProjectDataFrame( testInfo, testData )
+        
+        # compare the built dataframe to the one loaded from csv resource
