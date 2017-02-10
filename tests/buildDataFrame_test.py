@@ -1,6 +1,7 @@
 from unittest import TestCase
 from pandas import DataFrame
 from numbers import Number
+from datetime import datetime
 import json
 import numpy
 
@@ -11,7 +12,7 @@ def loadTestJson( file ):
         result_bytes = testinfo_file.read()
     return json.loads( result_bytes.decode('utf-8') )
         
-ignorableCsvHeaders = [ "Series", "Repeat" ]
+ignorableCsvHeaders = [ "Series", "Repeat", "Color", "ecs_r_squared" ]
 seriesDataColumns = [ "ECSt", "gH+", ]
     
 class buildDataFrame_test(TestCase):
@@ -39,11 +40,16 @@ class buildDataFrame_test(TestCase):
             self.assertIn( csvColumnHeader, builtDataKeys, "buildProjectDataFrame() result is missing header \"{0}\", which is present in test resources csv".format( csvColumnHeader ) )
             
             # assert that this column's content match between the csv and the built dataframe
-            # if csvColumnHeader in seriesDataColumns:
-            print( "checcking series values in column " + csvColumnHeader )
+            print( "testing consistency with csv values in column " + csvColumnHeader )
             csvColumnData = list(csvDataFrame[csvColumnHeader])
-            builtColumnData = builtDataFrame['Leaf Photosynthesis MultispeQ V1.0'][csvColumnHeader]
-            if isinstance( csvColumnData[0], Number ):
+            builtColumnData = builtDataFrame['Leaf Photosynthesis MultispeQ V1.0'][csvColumnHeader][:]
+            if csvColumnHeader == "time": 
+                csvColumnData = [ datetime.strptime(x, '%m/%d/%Y %I:%M %p') for x in csvColumnData] 
+                builtColumnData = [ datetime.strptime(x, ps.time_format) for x in builtColumnData] 
+                builtColumnData = [ datetime( x.year, x.month, x.day, x.hour, x.minute ) for x in builtColumnData] 
+            if isinstance( builtColumnData[0], Number ) or isinstance( csvColumnData[0], Number ):
+                csvColumnData = numpy.asarray([None if x == 'null' else x for x in csvColumnData] , dtype=float)
+                builtColumnData = numpy.asarray([None if x == 'null' else x for x in builtColumnData] , dtype=float)
                 numpy.testing.assert_array_almost_equal( csvColumnData, builtColumnData, err_msg="buildProjectDataFrame() result \"{0}\" numerical values do not match the corresponding column in the test resources csv".format( csvColumnHeader ) )
             else:
                 csvColumnData = [None if x == 'null' else x for x in csvColumnData]

@@ -4,6 +4,8 @@ from datetime import datetime
 
 import photosynq_py.getJson as getJson
 
+time_format = '%m/%d/%Y, %H:%M:%S %p'
+
 def getProjectDataFrame( projectId, include_raw_data = False  ):
     """
     Get a DataFrame for the given PhotosynQ project.
@@ -135,24 +137,24 @@ def buildProjectDataFrame( project_info, project_data ):
         
         spreadsheet[p] = {}
     
-        spreadsheet[p]["datum_id"] = [1]
-        spreadsheet[p]["time"] = [1]
+        spreadsheet[p]["datum_id"] = []
+        spreadsheet[p]["time"] = []
     
         for a in answers.keys():
-            spreadsheet[p][a] = [1]
+            spreadsheet[p][a] = []
     
         # Add the protocol to the list
         for i in range(len(protocols[p]["parameters"])):
             newKey = str(protocols[p]["parameters"][i])
             if not newKey in ToExclude:
-                spreadsheet[p][newKey] = [1]
+                spreadsheet[p][newKey] = []
     
-        spreadsheet[p]["user_id"] = [1]
-        spreadsheet[p]["device_id"] = [1]
-        spreadsheet[p]["status"] = [1]
-        spreadsheet[p]["notes"] = [1]
-        spreadsheet[p]["longitude"] = [1]
-        spreadsheet[p]["latitute"] = [1]
+        spreadsheet[p]["user_id"] = []
+        spreadsheet[p]["device_id"] = []
+        spreadsheet[p]["status"] = []
+        spreadsheet[p]["notes"] = []
+        spreadsheet[p]["longitude"] = []
+        spreadsheet[p]["latitute"] = []
     
     for measurement in project_data:
         
@@ -169,11 +171,8 @@ def buildProjectDataFrame( project_info, project_data ):
                         
                 elif param == "time":
                     unix_time = int(prot[str(param)])/1000
-                    time = datetime.utcfromtimestamp(unix_time).strftime('%m/%d/%Y, %H:%M:%S %p')
+                    time = datetime.utcfromtimestamp(unix_time).strftime(time_format)
                     spreadsheet[protocolID]["time"].append( str(time) )
-    
-                    # debug
-                    print( "converted unix time {0} to human-readable \"{1}\"".format( unix_time, time ) )
                     
                     # time <- as.POSIXlt( ( as.numeric(prot[str(param)]) / 1000 ), origin="1970-01-01" )
                     
@@ -213,6 +212,12 @@ def buildProjectDataFrame( project_info, project_data ):
                     if value == 'NA':
                         value = nan
                     spreadsheet[protocolID][param].append( value )
+        
+        # append empty cells as necesary so that each column is the same length
+        n = len( spreadsheet[protocolID]["datum_id"] )
+        for param in spreadsheet[protocolID].keys():
+            while len( spreadsheet[protocolID][param] ) < n:
+                spreadsheet[protocolID][param].append( None )
 #                    if type(prot[str(param)]) is list:
 #                        for elem in prot[str(param)]:
 #                            spreadsheet[protocolID][param].append( elem )
@@ -222,8 +227,6 @@ def buildProjectDataFrame( project_info, project_data ):
     # we have to do this to remove the first row
     for protocol in spreadsheet.keys():
         for parameter in spreadsheet[protocol].keys():
-            length = len(spreadsheet[protocol][parameter])
-            spreadsheet[protocol][parameter] = spreadsheet[protocol][parameter][1:length]
             if parameter in answers.keys():
                 newKey = answers[parameter]
                 spreadsheet[protocol][newKey] = spreadsheet[protocol].pop(parameter)
