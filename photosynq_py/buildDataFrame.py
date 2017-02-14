@@ -241,7 +241,8 @@ def buildProjectDataFrame( project_info, project_data ):
     for protocol in spreadsheet.keys():
         for parameter in spreadsheet[protocol].keys():
             spreadsheet[protocol][parameter] = numpy.asarray( spreadsheet[protocol][parameter] )
-    
+        spreadsheet[protocol] = DataFrame.from_dict( spreadsheet[protocol] )
+        
     return( DataFrame.from_dict( spreadsheet ) )
 
     
