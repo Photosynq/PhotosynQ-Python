@@ -197,6 +197,8 @@ def buildProjectDataFrame( project_info, project_data ):
                     value = prot[str(param)]
                     if value == 'NA':
                         value = nan
+                    if isinstance( value, list ):
+                        value = numpy.asarray( value )
                     measurementDict[param] = value
             
             spreadsheet.loc[spreadsheetRowIndex] = Series( measurementDict )
