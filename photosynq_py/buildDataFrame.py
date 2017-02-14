@@ -245,7 +245,7 @@ def buildProjectDataFrame( project_info, project_data ):
                 spreadsheet[protocol][parameter] = nparr
             else:
                 print( "nump.assarray returned a multi-dimensional array for parameter \"{0}\", not compatible with dataframe, skipping...".format( parameter ) )
-        #spreadsheet[protocol] = DataFrame.from_dict( spreadsheet[protocol] )
+        spreadsheet[protocol] = DataFrame.from_dict( spreadsheet[protocol] )
         
     result = DataFrame.from_dict( spreadsheet )
     return result
