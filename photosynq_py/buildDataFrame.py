@@ -130,33 +130,24 @@ def buildProjectDataFrame( project_info, project_data ):
     # Now that the preprocessing is done, we can start putting 
     # the data into the data frame
     
-    spreadsheet = {};
+    allParams = ["datum_id","time","user_id","device_id","status","notes","longitude","latitute", ]
     for p in protocols.keys():
-    
         if protocols[p]["count"] == 0:
             continue
-        
-        spreadsheet[p] = {}
-    
-        spreadsheet[p]["datum_id"] = []
-        spreadsheet[p]["time"] = []
-    
         for a in answers.keys():
-            spreadsheet[p][a] = []
-    
+            if not a in allParams:
+                allParams.append( a )
         # Add the protocol to the list
         for i in range(len(protocols[p]["parameters"])):
             newKey = str(protocols[p]["parameters"][i])
-            if not newKey in ToExclude:
-                spreadsheet[p][newKey] = []
-    
-        spreadsheet[p]["user_id"] = []
-        spreadsheet[p]["device_id"] = []
-        spreadsheet[p]["status"] = []
-        spreadsheet[p]["notes"] = []
-        spreadsheet[p]["longitude"] = []
-        spreadsheet[p]["latitute"] = []
-    
+            if (not newKey in ToExclude) and (not newKey in allParams):
+                allParams.append( newKey )
+
+    spreadsheet = DataFrame( columns=allParams, index=protocols.keys() );
+    for col in allParams:
+        for ind in protocols.keys():
+            spreadsheet[col][ind] = []
+
     for measurement in project_data:
         
         if not "location" in measurement.keys():
@@ -165,60 +156,60 @@ def buildProjectDataFrame( project_info, project_data ):
         for prot in measurement["sample"]:
             protocolID = str(prot["protocol_id"])
             
-            for param in spreadsheet[protocolID].keys():
+            for param in allParams:
     
                 if param == "datum_id":
-                    spreadsheet[protocolID]["datum_id"].append( measurement["datum_id"] )
+                    spreadsheet["datum_id"][protocolID].append( measurement["datum_id"] )
                         
                 elif param == "time":
                     unix_time = int(prot[str(param)])/1000
                     time = datetime.utcfromtimestamp(unix_time).strftime(time_format)
-                    spreadsheet[protocolID]["time"].append( str(time) )
+                    spreadsheet["time"][protocolID].append( str(time) )
                     
                     # time <- as.POSIXlt( ( as.numeric(prot[str(param)]) / 1000 ), origin="1970-01-01" )
                     
                         
                 elif param == "user_id":
-                    spreadsheet[protocolID]["user_id"].append( str(measurement["user_id"]) )
+                    spreadsheet["user_id"][protocolID].append( str(measurement["user_id"]) )
                         
                 elif param == "device_id":
-                    spreadsheet[protocolID]["device_id"].append( str(measurement["device_id"]) )
+                    spreadsheet["device_id"][protocolID].append( str(measurement["device_id"]) )
                           
                 elif param == "longitude":
-                    spreadsheet[protocolID]["longitude"].append( str(measurement["location"][0]) )                                                   
+                    spreadsheet["longitude"][protocolID].append( str(measurement["location"][0]) )                                                   
     
                 elif param == "latitute":
-                    spreadsheet[protocolID]["latitute"].append( str(measurement["location"][1]) )
+                    spreadsheet["latitute"][protocolID].append( str(measurement["location"][1]) )
     
                 elif param == "notes":
                     noteValue = None
                     if "note" in measurement.keys():
                         noteValue = measurement["note"]
-                    spreadsheet[protocolID]["notes"].append( str(noteValue) )
+                    spreadsheet["notes"][protocolID].append( str(noteValue) )
     
                 elif param == "status":
-                    spreadsheet[protocolID]["status"].append( str(measurement["status"]) )
+                    spreadsheet["status"][protocolID].append( str(measurement["status"]) )
     
                 elif param.startswith( "answer_" ):
                     answer_index = param.split( "_" )[1]
                     answer = None
                     if answer_index in measurement["user_answers"].keys():
                         answer = measurement["user_answers"][answer_index]
-                    spreadsheet[protocolID][param].append( answer )
+                    spreadsheet[param][protocolID].append( answer )
                     
                 elif str(param) in prot.keys():
-                    if not param in spreadsheet[protocolID].keys():
-                        spreadsheet[protocolID][param] = []
+#                    if not param in spreadsheet[protocolID].keys():
+#                        spreadsheet[param][protocolID] = []
                     value = prot[str(param)]
                     if value == 'NA':
                         value = nan
-                    spreadsheet[protocolID][param].append( value )
+                    spreadsheet[param][protocolID].append( value )
         
         # append empty cells as necesary so that each column is the same length
-        n = len( spreadsheet[protocolID]["datum_id"] )
-        for param in spreadsheet[protocolID].keys():
-            while len( spreadsheet[protocolID][param] ) < n:
-                spreadsheet[protocolID][param].append( None )
+        n = len( spreadsheet["datum_id"][protocolID] )
+        for param in allParams:
+            while len( spreadsheet[param][protocolID] ) < n:
+                spreadsheet[param][protocolID].append( None )
 #                    if type(prot[str(param)]) is list:
 #                        for elem in prot[str(param)]:
 #                            spreadsheet[protocolID][param].append( elem )
@@ -226,26 +217,21 @@ def buildProjectDataFrame( project_info, project_data ):
 #                        spreadsheet[protocolID][param].append( prot[str(param)] )
     
     # we have to do this to remove the first row
-    for protocol in spreadsheet.keys():
-        for parameter in spreadsheet[protocol].keys():
-            if parameter in answers.keys():
-                newKey = answers[parameter]
-                spreadsheet[protocol][newKey] = spreadsheet[protocol].pop(parameter)
+    for parameter in allParams:
+        if parameter in answers.keys():
+            print( "based on user answers, renaming column \"{0}\" to \"{1}\"".format( parameter, answers[parameter] ) )
+            spreadsheet.rename(columns={parameter: answers[parameter]}, inplace=True)
                 
-    for protocol in spreadsheet.keys():
+    for protocol in spreadsheet.index:
         if str(protocol) in protocols.keys() and "name" in protocols[str(protocol)].keys():
             newKey = protocols[str(protocol)]["name"]
-            spreadsheet[newKey] = spreadsheet.pop(protocol)
+            print( "based on protocol names, renaming index \"{0}\" to \"{1}\"".format( protocol, newKey ) )
+            spreadsheet.rename(index={protocol: newKey}, inplace=True)
             
     #convert lists to numpy arrays
     for protocol in spreadsheet.keys():
         for parameter in spreadsheet[protocol].keys():
-            nparr = numpy.asarray( spreadsheet[protocol][parameter] )
-            if nparr.ndim == 1:
-                spreadsheet[protocol][parameter] = nparr
-            else:
-                print( "nump.assarray returned a multi-dimensional array for parameter \"{0}\", not compatible with dataframe, skipping...".format( parameter ) )
-        spreadsheet[protocol] = DataFrame.from_dict( spreadsheet[protocol] )
+            spreadsheet[protocol][parameter] = numpy.asarray( spreadsheet[protocol][parameter] )
         
     # result = DataFrame( spreadsheet )
     return spreadsheet
