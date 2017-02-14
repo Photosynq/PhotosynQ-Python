@@ -29,8 +29,8 @@ class buildDataFrame_test(TestCase):
         
         # assert that built data frame "datum_id" values match the "ID" column in the csv
         csvIds = list( csvDataFrame.index )
-        builtDatumIds = builtDataFrame['Leaf Photosynthesis MultispeQ V1.0']['datum_id']
-        self.assertListEqual( csvIds, builtDatumIds, "buildProjectDataFrame() result datum_ids do not match the ID column in tst resources csv" )
+        builtDatumIds = list(builtDataFrame['Leaf Photosynthesis MultispeQ V1.0']['datum_id'])
+        self.assertListEqual( csvIds, builtDatumIds, "buildProjectDataFrame() result datum_ids do not match the ID column in test resources csv" )
         
         # assert that each column in the csv exists in the built dataframe
         builtDataKeys = builtDataFrame['Leaf Photosynthesis MultispeQ V1.0'].keys()
@@ -42,7 +42,7 @@ class buildDataFrame_test(TestCase):
             # assert that this column's content match between the csv and the built dataframe
             print( "testing consistency with csv values in column " + csvColumnHeader )
             csvColumnData = list(csvDataFrame[csvColumnHeader])
-            builtColumnData = builtDataFrame['Leaf Photosynthesis MultispeQ V1.0'][csvColumnHeader][:]
+            builtColumnData = list(builtDataFrame['Leaf Photosynthesis MultispeQ V1.0'][csvColumnHeader][:])
             if csvColumnHeader == "time": 
                 csvColumnData = [ datetime.strptime(x, '%m/%d/%Y %I:%M %p') for x in csvColumnData] 
                 builtColumnData = [ datetime.strptime(x, ps.time_format) for x in builtColumnData] 
