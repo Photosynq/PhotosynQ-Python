@@ -1,5 +1,6 @@
 from pandas import DataFrame
 from numpy import nan
+import numpy
 from datetime import datetime
 
 import photosynq_py.getJson as getJson
@@ -236,6 +237,11 @@ def buildProjectDataFrame( project_info, project_data ):
             newKey = protocols[str(protocol)]["name"]
             spreadsheet[newKey] = spreadsheet.pop(protocol)
             
+    #convert lists to numpy arrays
+    for protocol in spreadsheet.keys():
+        for parameter in spreadsheet[protocol].keys():
+            spreadsheet[protocol][parameter] = numpy.asarray( spreadsheet[protocol][parameter] )
+    
     return( DataFrame.from_dict( spreadsheet ) )
 
     
