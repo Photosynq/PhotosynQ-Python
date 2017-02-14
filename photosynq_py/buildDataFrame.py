@@ -1,4 +1,4 @@
-from pandas import DataFrame
+from pandas import DataFrame, Series
 from numpy import nan
 import numpy
 from datetime import datetime
@@ -130,7 +130,7 @@ def buildProjectDataFrame( project_info, project_data ):
     # Now that the preprocessing is done, we can start putting 
     # the data into the data frame
     
-    allParams = ["datum_id","time","user_id","device_id","status","notes","longitude","latitute", ]
+    allParams = ["datum_id","time","user_id","device_id","status","notes","longitude","latitute","protocol"]
     for p in protocols.keys():
         if protocols[p]["count"] == 0:
             continue
@@ -143,10 +143,8 @@ def buildProjectDataFrame( project_info, project_data ):
             if (not newKey in ToExclude) and (not newKey in allParams):
                 allParams.append( newKey )
 
-    spreadsheet = DataFrame( columns=allParams, index=protocols.keys() );
-    for col in allParams:
-        for ind in protocols.keys():
-            spreadsheet[col][ind] = []
+    spreadsheet = DataFrame( columns=allParams );
+    spreadsheetRowIndex = 0
 
     for measurement in project_data:
         
@@ -154,84 +152,88 @@ def buildProjectDataFrame( project_info, project_data ):
             measurement["location"] = [None,None]
         
         for prot in measurement["sample"]:
-            protocolID = str(prot["protocol_id"])
+            
+            measurementDict = { "protocol":str(prot["protocol_id"]) }
             
             for param in allParams:
     
                 if param == "datum_id":
-                    spreadsheet["datum_id"][protocolID].append( measurement["datum_id"] )
+                    measurementDict["datum_id"] = measurement["datum_id"]
                         
                 elif param == "time":
                     unix_time = int(prot[str(param)])/1000
                     time = datetime.utcfromtimestamp(unix_time).strftime(time_format)
-                    spreadsheet["time"][protocolID].append( str(time) )
-                    
-                    # time <- as.POSIXlt( ( as.numeric(prot[str(param)]) / 1000 ), origin="1970-01-01" )
-                    
+                    measurementDict["time"] = str(time)                    
                         
                 elif param == "user_id":
-                    spreadsheet["user_id"][protocolID].append( str(measurement["user_id"]) )
+                    measurementDict["user_id"] = str(measurement["user_id"]) 
                         
                 elif param == "device_id":
-                    spreadsheet["device_id"][protocolID].append( str(measurement["device_id"]) )
+                    measurementDict["device_id"] = str(measurement["device_id"]) 
                           
                 elif param == "longitude":
-                    spreadsheet["longitude"][protocolID].append( str(measurement["location"][0]) )                                                   
+                    measurementDict["longitude"] = str(measurement["location"][0])                                                    
     
                 elif param == "latitute":
-                    spreadsheet["latitute"][protocolID].append( str(measurement["location"][1]) )
+                    measurementDict["latitute"] = str(measurement["location"][1]) 
     
                 elif param == "notes":
                     noteValue = None
                     if "note" in measurement.keys():
                         noteValue = measurement["note"]
-                    spreadsheet["notes"][protocolID].append( str(noteValue) )
+                    measurementDict["notes"] = str(noteValue) 
     
                 elif param == "status":
-                    spreadsheet["status"][protocolID].append( str(measurement["status"]) )
+                    measurementDict["status"] = str(measurement["status"]) 
     
                 elif param.startswith( "answer_" ):
                     answer_index = param.split( "_" )[1]
                     answer = None
                     if answer_index in measurement["user_answers"].keys():
                         answer = measurement["user_answers"][answer_index]
-                    spreadsheet[param][protocolID].append( answer )
+                    measurementDict[param] = answer
                     
                 elif str(param) in prot.keys():
-#                    if not param in spreadsheet[protocolID].keys():
-#                        spreadsheet[param][protocolID] = []
                     value = prot[str(param)]
                     if value == 'NA':
                         value = nan
-                    spreadsheet[param][protocolID].append( value )
-        
+                    measurementDict[param] = value
+            
+            spreadsheet.loc[spreadsheetRowIndex] = Series( measurementDict )
+            spreadsheetRowIndex += 1
         # append empty cells as necesary so that each column is the same length
-        n = len( spreadsheet["datum_id"][protocolID] )
-        for param in allParams:
-            while len( spreadsheet[param][protocolID] ) < n:
-                spreadsheet[param][protocolID].append( None )
+#        n = len( spreadsheet["datum_id"][protocolID] )
+#        for param in allParams:
+#            while len( spreadsheet[param][protocolID] ) < n:
+#                spreadsheet[param][protocolID].append( None )
+
+
 #                    if type(prot[str(param)]) is list:
 #                        for elem in prot[str(param)]:
 #                            spreadsheet[protocolID][param].append( elem )
 #                    else:
 #                        spreadsheet[protocolID][param].append( prot[str(param)] )
     
-    # we have to do this to remove the first row
+    # switch all data to numpy arrays
+#    for parameter in allParams:
+#        spreadsheet[parameter] = numpy.asarray( spreadsheet[parameter] )
+        
+    # switch some parameters to human-readable names
     for parameter in allParams:
         if parameter in answers.keys():
             print( "based on user answers, renaming column \"{0}\" to \"{1}\"".format( parameter, answers[parameter] ) )
             spreadsheet.rename(columns={parameter: answers[parameter]}, inplace=True)
-                
-    for protocol in spreadsheet.index:
+            
+    for protocol in unique( spreadsheet['protocol'] ):
         if str(protocol) in protocols.keys() and "name" in protocols[str(protocol)].keys():
             newKey = protocols[str(protocol)]["name"]
-            print( "based on protocol names, renaming index \"{0}\" to \"{1}\"".format( protocol, newKey ) )
-            spreadsheet.rename(index={protocol: newKey}, inplace=True)
+            print( "based on protocol names in project info, renaming protocol \"{0}\" to \"{1}\"".format( protocol, newKey ) )
+            spreadsheet['protocol'] = [newKey if x == protocol else x for x in spreadsheet['protocol']]
+            
+            
+            #spreadsheet.rename(index={protocol: newKey}, inplace=True)
             
     #convert lists to numpy arrays
-    for protocol in spreadsheet.keys():
-        for parameter in spreadsheet[protocol].keys():
-            spreadsheet[protocol][parameter] = numpy.asarray( spreadsheet[protocol][parameter] )
         
     # result = DataFrame( spreadsheet )
     return spreadsheet
