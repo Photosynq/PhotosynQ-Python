@@ -247,7 +247,7 @@ def buildProjectDataFrame( project_info, project_data ):
                 print( "nump.assarray returned a multi-dimensional array for parameter \"{0}\", not compatible with dataframe, skipping...".format( parameter ) )
         spreadsheet[protocol] = DataFrame.from_dict( spreadsheet[protocol] )
         
-    result = DataFrame.from_dict( spreadsheet )
+    result = DataFrame.from_dict( spreadsheet, index=range(len(spreadsheet)) )
     return result
 
     
