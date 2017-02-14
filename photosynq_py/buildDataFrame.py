@@ -243,7 +243,7 @@ def buildProjectDataFrame( project_info, project_data ):
             nparr = numpy.asarray( spreadsheet[protocol][parameter] )
             if nparr.ndim == 1:
                 spreadsheet[protocol][parameter] = nparr
-            else 
+            else:
                 print( "nump.assarray returned a multi-dimensional array for parameter \"{0}\", not compatible with dataframe, skipping...".format( parameter ) )
         #spreadsheet[protocol] = DataFrame.from_dict( spreadsheet[protocol] )
         
