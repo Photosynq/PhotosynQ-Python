@@ -240,10 +240,15 @@ def buildProjectDataFrame( project_info, project_data ):
     #convert lists to numpy arrays
     for protocol in spreadsheet.keys():
         for parameter in spreadsheet[protocol].keys():
-            spreadsheet[protocol][parameter] = numpy.asarray( spreadsheet[protocol][parameter] )
-        spreadsheet[protocol] = DataFrame.from_dict( spreadsheet[protocol] )
+            nparr = numpy.asarray( spreadsheet[protocol][parameter] )
+            if nparr.ndim == 1:
+                spreadsheet[protocol][parameter] = nparr
+            else 
+                print( "nump.assarray returned a multi-dimensional array for parameter \"{0}\", not compatible with dataframe, skipping...".format( parameter ) )
+        #spreadsheet[protocol] = DataFrame.from_dict( spreadsheet[protocol] )
         
-    return( DataFrame.from_dict( spreadsheet ) )
+    result = DataFrame.from_dict( spreadsheet )
+    return result
 
     
 def unique(seq, keepstr=True):
