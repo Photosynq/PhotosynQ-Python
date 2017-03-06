@@ -14,7 +14,7 @@ def login(u_email=None):
     Login to the PhotosynQ API using your PhotosynQ account email address and password.
 
     This function must be called before making any requests
-    (see :func:`~photosynq_py.buildDataFrame.getProjectDataFrame`)
+    (see :func:`~photosynq_py.buildframe.get_project_dataframe`)
 
     You will be prompted to type their email address (if it is not provided as an argument) and
     password.

@@ -1,69 +1,84 @@
-from unittest import TestCase
-from pandas import DataFrame
+"""
+Test file corresponding with photosynq_py.buildframe
+"""
+
 from numbers import Number
 from datetime import datetime
 import json
+
+from unittest import TestCase
+from pandas import DataFrame
 import numpy
 
 import photosynq_py as ps
 
-def loadTestJson( file ):
-    with open(file, "rb") as testinfo_file:
-        result_bytes = testinfo_file.read()
-    return json.loads( result_bytes.decode('utf-8') )
+IGNORABLE_CSV_HEADERS = ["Series", "Repeat", "Color", "ecs_r_squared"]
 
-ignorableCsvHeaders = [ "Series", "Repeat", "Color", "ecs_r_squared" ]
-seriesDataColumns = [ "ECSt", "gH+", ]
+def load_test_json(file):
+    """
+    load a json structure from a file
+    """
+    with open(file, "rb") as test_info_file:
+        result_bytes = test_info_file.read()
+    return json.loads(result_bytes.decode('utf-8'))
 
-class buildframe_test(TestCase):
-    def test_buildDataFrame(self):
+class BuildframeTest(TestCase):
+    """
+    Test class corresponding with photosynq_py.buildframe
+    """
 
+    def test_build_project_dataframe(self):
+        """
+        Load canned json structures from test resources, pass them to
+        :func:`~photosynq_py.buildframe.build_project_dataframe`, and assert that the resulting
+        dataframe matches a canned csv.
+        """
         # load test resources
-        resourceFolder = "tests/resources/"
-        testInfo = loadTestJson(resourceFolder + "1224_info_from_api")["project"]
-        testData = loadTestJson(resourceFolder + "1224_data_from_api")["data"]
-        csvDataFrame = DataFrame.from_csv( resourceFolder + "1224_csv_from_website.csv" )
+        resource_folder = "tests/resources/"
+        test_info = load_test_json(resource_folder + "1224_info_from_api")["project"]
+        test_data = load_test_json(resource_folder + "1224_data_from_api")["data"]
+        csv_dataframe = DataFrame.from_csv(resource_folder + "1224_csv_from_website.csv")
 
         # build a dataframe
-        builtDataFrame = ps.build_project_dataframe( testInfo, testData )
-        builtDataFrame = builtDataFrame \
-            .loc[builtDataFrame['protocol'] == 'Leaf Photosynthesis MultispeQ V1.0']
+        built_dataframe = ps.build_project_dataframe(test_info, test_data)
+        built_dataframe = built_dataframe \
+            .loc[built_dataframe['protocol'] == 'Leaf Photosynthesis MultispeQ V1.0']
 
         # assert that built data frame "datum_id" values match the "ID" column in the csv
-        csvIds = list( csvDataFrame.index )
-        print( str( builtDataFrame['datum_id'] ) )
-        builtDatumIds = list(builtDataFrame['datum_id'])
-        self.assertListEqual(csvIds, builtDatumIds,
-            "buildProjectDataFrame() result datum_ids do not match the ID column in test resources csv" )
+        csv_ids = list(csv_dataframe.index)
+        print(str(built_dataframe['datum_id']))
+        builtDatumIds = list(built_dataframe['datum_id'])
+        self.assertListEqual(csv_ids, builtDatumIds, "build_project_dataframe() result datum_ids \
+                        do not match the ID column in test resources csv")
 
         # assert that each column in the csv exists in the built dataframe
-        builtDataKeys = builtDataFrame.columns
-        for csvColumnHeader in csvDataFrame.columns:
-            if csvColumnHeader in ignorableCsvHeaders:
-                continue;
-            self.assertIn( csvColumnHeader, builtDataKeys,
-                "buildProjectDataFrame() result is missing header \"{0}\", \
-                which is present in test resources csv".format( csvColumnHeader ) )
+        built_keys = built_dataframe.columns
+        for csv_col_header in csv_dataframe.columns:
+            if csv_col_header in IGNORABLE_CSV_HEADERS:
+                continue
+            self.assertIn(csv_col_header, built_keys,
+                          "buildProjectDataFrame() result is missing header \"{0}\", \
+                          which is present in test resources csv".format(csv_col_header))
 
             # assert that this column's content match between the csv and the built dataframe
-            print( "testing consistency with csv values in column " + csvColumnHeader )
-            csvColumnData = list(csvDataFrame[csvColumnHeader])
-            builtColumnData = list(builtDataFrame[csvColumnHeader][:])
-            if csvColumnHeader == "time":
-                csvColumnData = [ datetime.strptime(x, '%m/%d/%Y %I:%M %p') for x in csvColumnData]
-                builtColumnData = [ datetime.strptime(x, ps.TIME_FORMAT) for x in builtColumnData]
-                builtColumnData = [ datetime( x.year, x.month, x.day, x.hour, x.minute ) \
-                    for x in builtColumnData]
-            if isinstance( builtColumnData[0], Number ) or isinstance( csvColumnData[0], Number ):
-                csvColumnData = numpy.asarray( \
-                    [None if x == 'null' else x for x in csvColumnData], dtype=float)
-                builtColumnData = numpy.asarray( \
-                    [None if x == 'null' else x for x in builtColumnData] , dtype=float)
-                numpy.testing.assert_array_almost_equal( csvColumnData, builtColumnData, \
+            print("testing consistency with csv values in column " + csv_col_header)
+            csv_col_data = list(csv_dataframe[csv_col_header])
+            built_col_data = list(built_dataframe[csv_col_header][:])
+            if csv_col_header == "time":
+                csv_col_data = [datetime.strptime(x, '%m/%d/%Y %I:%M %p') for x in csv_col_data]
+                built_col_data = [datetime.strptime(x, ps.TIME_FORMAT) for x in built_col_data]
+                built_col_data = [datetime(x.year, x.month, x.day, x.hour, x.minute) \
+                    for x in built_col_data]
+            if isinstance(built_col_data[0], Number) or isinstance(csv_col_data[0], Number):
+                csv_col_data = numpy.asarray( \
+                    [None if x == 'null' else x for x in csv_col_data], dtype=float)
+                built_col_data = numpy.asarray( \
+                    [None if x == 'null' else x for x in built_col_data], dtype=float)
+                numpy.testing.assert_array_almost_equal(csv_col_data, built_col_data, \
                     err_msg="buildProjectDataFrame() result \"{0}\" numerical values do not match \
-                    the corresponding column in the test resources csv".format( csvColumnHeader ) )
+                    the corresponding column in the test resources csv".format(csv_col_header))
             else:
-                csvColumnData = [None if x == 'null' else x for x in csvColumnData]
-                self.assertListEqual( csvColumnData, builtColumnData,
-                    "buildProjectDataFrame() result \"{0}\" values do not match the corresponding \
-                    column in the test resources csv".format( csvColumnHeader ) )
+                csv_col_data = [None if x == 'null' else x for x in csv_col_data]
+                self.assertListEqual(csv_col_data, built_col_data,
+                            "buildProjectDataFrame() result \"{0}\" values do not match the \
+                            corresponding column in the test resources csv".format(csv_col_header))
