@@ -33,11 +33,11 @@ import photosynq_py as ps
 
 # use your photosynq account to login (you will be prompted for your password)
 email = "john.doe@domain.com"
-ps.login( email )
+ps.login(email)
 
 # retrieve a dataframe with data from the given project ID
 projectId = 1224
-df = ps.getProjectDataFrame( projectId, include_raw_data = False )
+df = ps.get_project_dataframe(projectId, include_raw_data=False)
 
 # logout
 ps.logout();
@@ -51,9 +51,9 @@ Advanced users can retrieve project data and meta-data/info separately, as **[js
 ```py
 ps.login( "john.doe@domain.com" )
 projectId = 1224
-info = ps.getProjectInfo( projectId )
-data = ps.getProjectData( projectId, include_raw_data = False )
-df = ps.buildProjectDataFrame( info, data )
+info = ps.get_project_info(projectId)
+data = ps.get_project_data(projectId, include_raw_data=False)
+df = ps.buildProjectDataFrame(info, data)
 ps.logout()
 ```
 [DataFrame]: http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html "DataFrame"
