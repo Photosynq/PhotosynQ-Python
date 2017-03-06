@@ -18,7 +18,7 @@ For advanced users, we recommend using **[Spyder]** to edit and run python code.
 Install using pip in the terminal.
 
 ```bash
-pip install git+https://github.com/Photosynq/PhotosynQ-Python.git
+pip install git+https://github.com/Photosynq/PhotosynQ-Python.git --upgrade
 ```
 
 ***
