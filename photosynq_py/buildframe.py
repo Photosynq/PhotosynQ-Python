@@ -191,6 +191,9 @@ def build_project_dataframe(project_info, project_data):
 
             for param in all_params:
 
+                # debug
+                print("str(param) '{0}'".format(str(param)) )
+                
                 if param == "datum_id":
                     msmnt_dict["datum_id"] = measurement["datum_id"]
 
@@ -226,7 +229,7 @@ def build_project_dataframe(project_info, project_data):
                     if answer_index in measurement["user_answers"].keys():
                         answer = measurement["user_answers"][answer_index]
                     msmnt_dict[param] = answer
-
+                    
                 elif str(param) in prot.keys():
                     value = prot[str(param)]
                     if value == 'NA':
