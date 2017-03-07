@@ -281,12 +281,12 @@ def build_project_dataframe(project_info, project_data):
 
 def encode_utf_8(text):
     """
-    Hack to encode utf-8 in python 2 and 3, untiI find a better way.
+    Hack to encode utf-8 (if necessary) in python 2 and 3, untiI find a better way.
     """
     try:
         result = str(text.encode('utf-8'))
     except:
-        print( "error. Raw text: '{0}'".format( text ) )
+        return text
     if(result.startswith("b'") and result.endswith("'")):
         result = result[2:-1]
     return result
