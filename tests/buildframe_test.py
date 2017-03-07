@@ -51,6 +51,10 @@ class BuildframeTest(TestCase):
         self.assertListEqual(csv_ids, builtDatumIds, "build_project_dataframe() result datum_ids \
                         do not match the ID column in test resources csv")
 
+        #deubg
+        print( "csv columns: " + str( csv_dataframe.columns ) );
+        print( "built columns: " + str( built_dataframe.columns ) );
+        
         # assert that each column in the csv exists in the built dataframe
         built_keys = built_dataframe.columns
         for csv_col_header in csv_dataframe.columns:

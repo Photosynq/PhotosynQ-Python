@@ -170,7 +170,8 @@ def build_project_dataframe(project_info, project_data):
                 all_params.append(ans)
         # Add the protocol to the list
         for i in range(len(protocols[prot]["parameters"])):
-            new_key = str(protocols[prot]["parameters"][i])
+            new_key = encode_utf_8(protocols[prot]["parameters"][i])
+            # new_key = str(protocols[prot]["parameters"][i])
             if (new_key not in PARAMS_TO_EXCLUDE) and (new_key not in all_params):
                 all_params.append(new_key)
 
@@ -224,13 +225,16 @@ def build_project_dataframe(project_info, project_data):
                         answer = measurement["user_answers"][answer_index]
                     msmnt_dict[param] = answer
 
-                elif str(param) in prot.keys():
-                    value = prot[str(param)]
-                    if value == 'NA':
-                        value = nan
-                    if isinstance(value, list):
-                        value = numpy.asarray(value)
-                    msmnt_dict[param] = value
+                else:
+                    for key in prot.keys():
+                        prot[encode_utf_8(key)] = prot.pop(key)
+                    if param in prot.keys():
+                        value = prot[param]
+                        if value == 'NA':
+                            value = nan
+                        if isinstance(value, list):
+                            value = numpy.asarray(value)
+                        msmnt_dict[param] = value
 
             spreadsheet.loc[row_index] = Series(msmnt_dict)
             row_index += 1
@@ -274,6 +278,18 @@ def build_project_dataframe(project_info, project_data):
     # result = DataFrame( spreadsheet )
     return spreadsheet
 
+
+def encode_utf_8(text):
+    """
+    Hack to encode utf-8 (if necessary) in python 2 and 3, untiI find a better way.
+    """
+    try:
+        result = str(text.encode('utf-8'))
+    except:
+        return text
+    if(result.startswith("b'") and result.endswith("'")):
+        result = result[2:-1]
+    return result
 
 def unique(seq):
     """
