@@ -188,7 +188,7 @@ def build_project_dataframe(project_info, project_data):
             msmnt_dict = {"protocol":str(prot["protocol_id"])}
 
             for param in all_params:
-                
+
                 if param == "datum_id":
                     msmnt_dict["datum_id"] = measurement["datum_id"]
 
@@ -224,7 +224,7 @@ def build_project_dataframe(project_info, project_data):
                     if answer_index in measurement["user_answers"].keys():
                         answer = measurement["user_answers"][answer_index]
                     msmnt_dict[param] = answer
-                
+
                 else:
                     for key in prot.keys():
                         prot[encode_utf_8(key)] = prot.pop(key)
@@ -290,7 +290,7 @@ def encode_utf_8(text):
     if(result.startswith("b'") and result.endswith("'")):
         result = result[2:-1]
     return result
-    
+
 def unique(seq):
     """
     Get a list of unique elements from the given list.
