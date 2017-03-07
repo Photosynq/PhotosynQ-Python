@@ -283,7 +283,11 @@ def encode_utf_8(text):
     """
     Hack to encode utf-8 in python 2 and 3, untiI find a better way.
     """
-    result = str(text.encode('utf-8'))
+    utf8 = text.encode('utf-8')
+    try:
+        result = str(utf8)
+    except:
+        print( "error converting utf-8 bytes to string. Raw text: '{0}'".format( text ) )
     if(result.startswith("b'") and result.endswith("'")):
         result = result[2:-1]
     return result
