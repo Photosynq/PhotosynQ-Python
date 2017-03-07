@@ -224,14 +224,17 @@ def build_project_dataframe(project_info, project_data):
                     if answer_index in measurement["user_answers"].keys():
                         answer = measurement["user_answers"][answer_index]
                     msmnt_dict[param] = answer
-                    
-                elif encode_utf_8(param) in prot.keys():
-                    value = prot[encode_utf_8(param)]
-                    if value == 'NA':
-                        value = nan
-                    if isinstance(value, list):
-                        value = numpy.asarray(value)
-                    msmnt_dict[param] = value
+                
+                else:
+                    for key in prot.keys():
+                        prot[encode_utf_8(key)] = prot.pop(key)
+                    if param in prot.keys():
+                        value = prot[param]
+                        if value == 'NA':
+                            value = nan
+                        if isinstance(value, list):
+                            value = numpy.asarray(value)
+                        msmnt_dict[param] = value
 
             spreadsheet.loc[row_index] = Series(msmnt_dict)
             row_index += 1
@@ -282,7 +285,7 @@ def encode_utf_8(text):
     """
     result = str(text.encode('utf-8'))
     if(result.startswith("b'") and result.endswith("'")):
-        result = new_key[2:-1]
+        result = result[2:-1]
     return result
     
 def unique(seq):
