@@ -227,13 +227,18 @@ def build_project_dataframe(project_info, project_data):
                         answer = measurement["user_answers"][answer_index]
                     msmnt_dict[param] = answer
                     
-                elif str(param) in prot.keys():
-                    value = prot[str(param)]
-                    if value == 'NA':
-                        value = nan
-                    if isinstance(value, list):
-                        value = numpy.asarray(value)
-                    msmnt_dict[param] = value
+                else:
+                    
+                    # debug
+                    print("str(param): '{0}'".format(str(param)))
+                
+                    if str(param) in prot.keys():
+                        value = prot[str(param)]
+                        if value == 'NA':
+                            value = nan
+                        if isinstance(value, list):
+                            value = numpy.asarray(value)
+                        msmnt_dict[param] = value
 
             spreadsheet.loc[row_index] = Series(msmnt_dict)
             row_index += 1
