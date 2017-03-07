@@ -170,9 +170,7 @@ def build_project_dataframe(project_info, project_data):
                 all_params.append(ans)
         # Add the protocol to the list
         for i in range(len(protocols[prot]["parameters"])):
-            new_key = str(protocols[prot]["parameters"][i].encode('utf-8'))
-            if(new_key.startswith("b'") and new_key.endswith("'")):
-                new_key = new_key[2:-1]
+            new_key = encode_utf_8(protocols[prot]["parameters"][i])
             # new_key = str(protocols[prot]["parameters"][i])
             if (new_key not in PARAMS_TO_EXCLUDE) and (new_key not in all_params):
                 all_params.append(new_key)
@@ -227,18 +225,13 @@ def build_project_dataframe(project_info, project_data):
                         answer = measurement["user_answers"][answer_index]
                     msmnt_dict[param] = answer
                     
-                else:
-                    
-                    # debug
-                    print("str(param): '{0}'".format(str(param)))
-                
-                    if str(param) in prot.keys():
-                        value = prot[str(param)]
-                        if value == 'NA':
-                            value = nan
-                        if isinstance(value, list):
-                            value = numpy.asarray(value)
-                        msmnt_dict[param] = value
+                elif encode_utf_8(param) in prot.keys():
+                    value = prot[encode_utf_8(param)]
+                    if value == 'NA':
+                        value = nan
+                    if isinstance(value, list):
+                        value = numpy.asarray(value)
+                    msmnt_dict[param] = value
 
             spreadsheet.loc[row_index] = Series(msmnt_dict)
             row_index += 1
@@ -283,6 +276,15 @@ def build_project_dataframe(project_info, project_data):
     return spreadsheet
 
 
+def encode_utf_8(text):
+    """
+    Hack to encode utf-8 in python 2 and 3, untiI find a better way.
+    """
+    result = str(text.encode('utf-8'))
+    if(result.startswith("b'") and result.endswith("'")):
+        result = new_key[2:-1]
+    return result
+    
 def unique(seq):
     """
     Get a list of unique elements from the given list.
