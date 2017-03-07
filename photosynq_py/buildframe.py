@@ -190,9 +190,6 @@ def build_project_dataframe(project_info, project_data):
             msmnt_dict = {"protocol":str(prot["protocol_id"])}
 
             for param in all_params:
-
-                # debug
-                print("str(param) '{0}'".format(str(param)) )
                 
                 if param == "datum_id":
                     msmnt_dict["datum_id"] = measurement["datum_id"]
