@@ -24,10 +24,10 @@ def get_project_info(project_id):
     Get info for the given PhotosynQ project.
 
     This function is intended for use within
-    :func:`~photosynq_py.buildDataFrame.getProjectDataFrame`, or for advanced users that need to
+    :func:`~photosynq_py.buildframe.get_project_dataframe`, or for advanced users that need to
     retrieve project info as a separate step.
 
-    Normal users should use :func:`~photosynq_py.buildDataFrame.getProjectDataFrame` instead.
+    Normal users should use :func:`~photosynq_py.buildframe.get_project_dataframe` instead.
 
     :param project_id: the ID number for the PhotosynQ project to retrieve info from.
     :returns: a json string containing info for the given project
@@ -46,10 +46,10 @@ def get_project_data(project_id, include_raw_data=False):
     Get data for the given PhotosynQ project.
 
     This function is intended for use within
-    :func:`~photosynq_py.buildDataFrame.getProjectDataFrame`, or for advanced users that need to
+    :func:`~photosynq_py.buildframe.get_project_dataframe`, or for advanced users that need to
     retrieve project info as a separate step.
 
-    Normal users should use :func:`~photosynq_py.buildDataFrame.getProjectDataFrame` instead.
+    Normal users should use :func:`~photosynq_py.buildframe.get_project_dataframe` instead.
 
     :param project_id: the ID number for the PhotosynQ project to retrieve data from.
     :returns: a json string containing data for the given project

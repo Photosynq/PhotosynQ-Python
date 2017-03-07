@@ -170,7 +170,8 @@ def build_project_dataframe(project_info, project_data):
                 all_params.append(ans)
         # Add the protocol to the list
         for i in range(len(protocols[prot]["parameters"])):
-            new_key = str(protocols[prot]["parameters"][i])
+            new_key = str(protocols[prot]["parameters"][i].encode('utf-8'), 'utf-8')
+            # new_key = str(protocols[prot]["parameters"][i])
             if (new_key not in PARAMS_TO_EXCLUDE) and (new_key not in all_params):
                 all_params.append(new_key)
 
