@@ -204,10 +204,10 @@ def build_project_dataframe(project_info, project_data):
                     msmnt_dict["device_id"] = str(measurement["device_id"])
 
                 elif param == "longitude":
-                    msmnt_dict["longitude"] = str(measurement["location"][0])
+                    msmnt_dict["longitude"] = str(measurement["location"][1])
 
                 elif param == "latitute":
-                    msmnt_dict["latitute"] = str(measurement["location"][1])
+                    msmnt_dict["latitute"] = str(measurement["location"][0])
 
                 elif param == "notes":
                     note_values = None
