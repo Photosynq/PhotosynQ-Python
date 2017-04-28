@@ -36,8 +36,8 @@ email = "john.doe@domain.com"
 ps.login(email)
 
 # retrieve a dataframe with data from the given project ID
-projectId = 1224
-df = ps.get_project_dataframe(projectId, include_raw_data=False)
+projectId = 1556
+df = ps.get_project_dataframe(projectId)
 
 # logout
 ps.logout();
@@ -50,9 +50,9 @@ Advanced users can retrieve project data and meta-data/info separately, as **[js
 `getProjectInfo`, `getProjectData` and `buildProjectDataFrame` (below) are components of `getProjectDataFrame` (above)
 ```py
 ps.login( "john.doe@domain.com" )
-projectId = 1224
+projectId = 1556
 info = ps.get_project_info(projectId)
-data = ps.get_project_data(projectId, include_raw_data=False)
+data = ps.get_project_data(projectId, processed_data=False) # Use raw data
 df = ps.buildProjectDataFrame(info, data)
 ps.logout()
 ```
