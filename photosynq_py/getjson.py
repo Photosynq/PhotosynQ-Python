@@ -11,7 +11,7 @@ import photosynq_py.globals as gvars
 INFO_URL = gvars.API_URL + "/projects/{0}.json?user_email={1}&user_token={2}"
 
 DATA_URL = gvars.API_URL + \
-    "/projects/{0}/data.json?user_email={1}&user_token={2}&upd=true&include_raw_data={3}"
+    "/projects/{0}/data.json?user_email={1}&user_token={2}&upd={3}&include_raw_data={4}"
 
 def get_json_content(response):
     """
@@ -36,12 +36,12 @@ def get_project_info(project_id):
     """
     if gvars.AUTH_TOKEN is None:
         raise Exception("not logged in.")
-    req_url = INFO_URL.format(str(project_id), gvars.USER_EMAIL, gvars.AUTH_TOKEN)
+    req_url = INFO_URL.format(str(project_id), gvars.USER_EMAIL, gvars.AUTH_TOKEN)    
     rsp = requests.get(req_url)
     content = get_json_content(rsp)
     return content["project"]
 
-def get_project_data(project_id, include_raw_data=False):
+def get_project_data(project_id, processed_data=True, raw_traces=False):
     """
     Get data for the given PhotosynQ project.
 
@@ -58,7 +58,7 @@ def get_project_data(project_id, include_raw_data=False):
     """
     if gvars.AUTH_TOKEN is None:
         raise Exception("not logged in.")
-    req_url = DATA_URL.format(project_id, gvars.USER_EMAIL, gvars.AUTH_TOKEN, include_raw_data)
+    req_url = DATA_URL.format(project_id, gvars.USER_EMAIL, gvars.AUTH_TOKEN, processed_data, raw_traces)
     rsp = requests.get(req_url)
     content = get_json_content(rsp)
     return content["data"]

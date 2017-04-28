@@ -27,7 +27,7 @@ PARAMS_TO_EXCLUDE = [
     "r", "g", "b", "recall", "messages", "order"
 ]
 
-def get_project_dataframe(project_id, include_raw_data=False):
+def get_project_dataframe(project_id, processed_data=True, raw_traces=False):
     """
     Get a DataFrame for the given PhotosynQ project.
 
@@ -36,7 +36,7 @@ def get_project_dataframe(project_id, include_raw_data=False):
     one dataframe using :func:`~photosynq_py.buildframe.build_project_data_frame`.
 
     :param project_id: the ID number for the PhotosynQ project to retrieve info and data from.
-    :param include_raw_data: True if raw data should be requested and included in the result
+    :param raw_traces: True if raw data should be requested and included in the result
         (default False)
     :returns: a dataframe containing project info and data, created by calling
         :func:`~photosynq_py.buildframe.build_project_dataframe`
@@ -44,7 +44,7 @@ def get_project_dataframe(project_id, include_raw_data=False):
         (see :func:`~photosynq_py.auth.login`)
     """
     project_info = getJson.get_project_info(project_id)
-    project_data = getJson.get_project_data(project_id, include_raw_data)
+    project_data = getJson.get_project_data(project_id, processed_data, raw_traces)
     return build_project_dataframe(project_info, project_data)
 
 
@@ -157,7 +157,7 @@ def build_project_dataframe(project_info, project_data):
 
 
     for prot in protocols.keys():
-        protocols[prot]["parameters"] = unique(protocols[prot]["parameters"])
+        protocols[prot]["parameters"] = list(set(protocols[prot]["parameters"]))
 
     # Now that the preprocessing is done, we can start putting
     # the data into the data frame
@@ -262,7 +262,7 @@ def build_project_dataframe(project_info, project_data):
                     .format(parameter, answers[parameter]))
             spreadsheet.rename(columns={parameter: answers[parameter]}, inplace=True)
 
-    for protocol in unique(spreadsheet['protocol']):
+    for protocol in list(set(spreadsheet['protocol'])):
         if str(protocol) in protocols.keys() and "name" in protocols[str(protocol)].keys():
             new_key = protocols[str(protocol)]["name"]
             print("based on protocol names in project info, renaming protocol \"{0}\" to \"{1}\"" \
@@ -290,13 +290,3 @@ def encode_utf_8(text):
     if(result.startswith("b'") and result.endswith("'")):
         result = result[2:-1]
     return result
-
-def unique(seq):
-    """
-    Get a list of unique elements from the given list.
-    """
-    seq_type = type(seq)
-    if seq_type == str:
-        seq_type = (list, ''.join)[True]
-    seen = []
-    return seq_type(c for c in seq if not (c in seen or seen.append(c)))
