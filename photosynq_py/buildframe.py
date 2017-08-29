@@ -248,7 +248,7 @@ def build_project_dataframe(project_info, project_data):
                 elif param == "status":
                     msmnt_dict["status"] = str(measurement["status"])
 
-                elif param.startswith("answer_"):
+                elif param.startswith("answer_"):                
                     answer_index = param.split("_")[1]
                     answer = None
                     if answer_index in measurement["user_answers"].keys():
@@ -269,14 +269,17 @@ def build_project_dataframe(project_info, project_data):
             # append a row to the dataframe for this protocolID
             spreadsheet[protocolID] = spreadsheet[protocolID].append( Series(msmnt_dict), ignore_index=True )
             
-            # switch some parameters to human-readable names
-            for parameter in spreadsheet[protocolID].columns:
-                if parameter in answers.keys():
-                    print("based on user answers, renaming column \"{0}\" to \"{1}\"" \
-                            .format(parameter, answers[parameter]))
-                    spreadsheet[protocolID].rename(columns={parameter: answers[parameter]}, inplace=True)
 
     for protocol in list(spreadsheet.keys()):
+    
+        # switch some parameters to human-readable names
+        for parameter in spreadsheet[protocol].columns:
+            if parameter in answers.keys():
+                print("based on user answers, renaming column \"{0}\" to \"{1}\"" \
+                        .format(parameter, answers[parameter]))
+                spreadsheet[protocol].rename(columns={parameter: answers[parameter]}, inplace=True)
+        
+        # switch some dictionary keys to better names
         if str(protocol) in protocols.keys() and "name" in protocols[str(protocol)].keys():
             new_key = protocols[str(protocol)]["name"]
             print("based on protocol names in project info, renaming protocol \"{0}\" to \"{1}\"" \

@@ -41,8 +41,7 @@ class BuildframeTest(TestCase):
 
         # build a dataframe
         built_dataframe = ps.build_project_dataframe(test_info, test_data)
-        built_dataframe = built_dataframe \
-            .loc[built_dataframe['protocol'] == 'Leaf Photosynthesis MultispeQ V1.0']
+        built_dataframe = built_dataframe['Leaf Photosynthesis MultispeQ V1.0']
 
         # assert that built data frame "datum_id" values match the "ID" column in the csv
         csv_ids = list(csv_dataframe.index)
