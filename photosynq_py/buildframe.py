@@ -12,8 +12,7 @@ import photosynq_py.getjson as getJson
 TIME_FORMAT = '%m/%d/%Y, %H:%M:%S %p'
 
 DEFAULT_PARAMS = [
-    "datum_id", "time", "user_id", "device_id", "status", "notes", "longitude", "latitute",
-    "protocol"
+    "datum_id", "time", "user_id", "device_id", "status", "notes", "longitude", "latitude"
 ]
 
 PARAMS_TO_EXCLUDE = [
@@ -153,18 +152,27 @@ def build_project_dataframe(project_info, project_data):
 
             # Check if there is custom data
             if "custom" in sampleindex.keys():
-                protocols["custom"] = protocols["custom"] + 1
+                # Insert the parameter names and count the number of measurements
+                protocols["custom"]["parameters"] += list(sampleindex["custom"].keys())
+                protocols["custom"]["count"] <- protocols["custom"]["count"] + 1
+                # protocols["custom"] = protocols["custom"] + 1
 
 
     for prot in protocols.keys():
         protocols[prot]["parameters"] = list(set(protocols[prot]["parameters"]))
 
+    spreadsheet = {}
+        
     # Now that the preprocessing is done, we can start putting
     # the data into the data frame
-    all_params = DEFAULT_PARAMS[:]
     for prot in protocols.keys():
+           
+        all_params = DEFAULT_PARAMS[:]
+        
+        # If there are no measurements skip the protocol
         if protocols[prot]["count"] == 0:
             continue
+            
         for ans in answers.keys():
             if not ans in all_params:
                 all_params.append(ans)
@@ -175,27 +183,49 @@ def build_project_dataframe(project_info, project_data):
             if (new_key not in PARAMS_TO_EXCLUDE) and (new_key not in all_params):
                 all_params.append(new_key)
 
-    spreadsheet = DataFrame(columns=all_params)
-    row_index = 0
-
+        spreadsheet[prot] = DataFrame(columns=all_params)
+        
     for measurement in project_data:
 
         if not "location" in measurement.keys():
             measurement["location"] = [None, None]
 
-        for prot in measurement["sample"]:
+        protocols_for_measurement = measurement["sample"]
+        if "custom" in measurement.keys():
+            protocols_for_measurement.append( measurement["custom"] )
+        
+        for prot in protocols_for_measurement:
+            
+            if "protocol_id" in prot.keys():
+                protocolID = str(prot["protocol_id"])
+            else:
+                protocolID = "custom"
+            msmnt_dict = {}
+            
+            # if necessary, create a new dataframe for this protocolID
+            if protocolID not in spreadsheet.keys():
+                cols = DEFAULT_PARAMS[:]
+                for key in prot.keys():
+                    if key not in cols:
+                        cols.append( key )
+                spreadsheet[protocolID] = DataFrame(columns=cols)
 
-            msmnt_dict = {"protocol":str(prot["protocol_id"])}
-
-            for param in all_params:
+            for param in spreadsheet[protocolID].columns:
 
                 if param == "datum_id":
                     msmnt_dict["datum_id"] = measurement["datum_id"]
 
                 elif param == "time":
-                    unix_time = int(prot[str(param)])/1000
-                    time = datetime.utcfromtimestamp(unix_time).strftime(TIME_FORMAT)
-                    msmnt_dict["time"] = str(time)
+                    
+                    # for custom data, re-use the last valid time
+                    # this is how Photosynq-R behaves (might be a bug)
+                    if "time" not in prot.keys():
+                        msmnt_dict["time"] = str(time)
+                        
+                    else:
+                        unix_time = int(prot["time"])/1000
+                        time = datetime.utcfromtimestamp(unix_time).strftime(TIME_FORMAT)
+                        msmnt_dict["time"] = str(time)
 
                 elif param == "user_id":
                     msmnt_dict["user_id"] = str(measurement["user_id"])
@@ -206,8 +236,8 @@ def build_project_dataframe(project_info, project_data):
                 elif param == "longitude":
                     msmnt_dict["longitude"] = str(measurement["location"][1])
 
-                elif param == "latitute":
-                    msmnt_dict["latitute"] = str(measurement["location"][0])
+                elif param == "latitude":
+                    msmnt_dict["latitude"] = str(measurement["location"][0])
 
                 elif param == "notes":
                     note_values = None
@@ -235,47 +265,26 @@ def build_project_dataframe(project_info, project_data):
                         if isinstance(value, list):
                             value = numpy.asarray(value)
                         msmnt_dict[param] = value
+                        
+            # append a row to the dataframe for this protocolID
+            spreadsheet[protocolID] = spreadsheet[protocolID].append( Series(msmnt_dict), ignore_index=True )
+            
+            # switch some parameters to human-readable names
+            for parameter in spreadsheet[protocolID].columns:
+                if parameter in answers.keys():
+                    print("based on user answers, renaming column \"{0}\" to \"{1}\"" \
+                            .format(parameter, answers[parameter]))
+                    spreadsheet[protocolID].rename(columns={parameter: answers[parameter]}, inplace=True)
 
-            spreadsheet.loc[row_index] = Series(msmnt_dict)
-            row_index += 1
-        # append empty cells as necesary so that each column is the same length
-#        n = len( spreadsheet["datum_id"][protocolID] )
-#        for param in allParams:
-#            while len( spreadsheet[param][protocolID] ) < n:
-#                spreadsheet[param][protocolID].append( None )
-
-
-#                    if type(prot[str(param)]) is list:
-#                        for elem in prot[str(param)]:
-#                            spreadsheet[protocolID][param].append( elem )
-#                    else:
-#                        spreadsheet[protocolID][param].append( prot[str(param)] )
-
-    # switch all data to numpy arrays
-#    for parameter in allParams:
-#        spreadsheet[parameter] = numpy.asarray( spreadsheet[parameter] )
-
-    # switch some parameters to human-readable names
-    for parameter in all_params:
-        if parameter in answers.keys():
-            print("based on user answers, renaming column \"{0}\" to \"{1}\"" \
-                    .format(parameter, answers[parameter]))
-            spreadsheet.rename(columns={parameter: answers[parameter]}, inplace=True)
-
-    for protocol in list(set(spreadsheet['protocol'])):
+    for protocol in list(spreadsheet.keys()):
         if str(protocol) in protocols.keys() and "name" in protocols[str(protocol)].keys():
             new_key = protocols[str(protocol)]["name"]
             print("based on protocol names in project info, renaming protocol \"{0}\" to \"{1}\"" \
                     .format(protocol, new_key))
-            spreadsheet['protocol'] \
-                    = [new_key if x == protocol else x for x in spreadsheet['protocol']]
+            if new_key!=protocol:  
+                spreadsheet[new_key] = spreadsheet[protocol]
+                del spreadsheet[protocol]
 
-
-            #spreadsheet.rename(index={protocol: new_key}, inplace=True)
-
-    #convert lists to numpy arrays
-
-    # result = DataFrame( spreadsheet )
     return spreadsheet
 
 
