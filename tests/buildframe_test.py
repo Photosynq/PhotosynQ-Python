@@ -45,14 +45,13 @@ class BuildframeTest(TestCase):
 
         # assert that built data frame "datum_id" values match the "ID" column in the csv
         csv_ids = list(csv_dataframe.index)
-        print(str(built_dataframe['datum_id']))
         builtDatumIds = list(built_dataframe['datum_id'])
         self.assertListEqual(csv_ids, builtDatumIds, "build_project_dataframe() result datum_ids \
                         do not match the ID column in test resources csv")
 
         #deubg
-        print( "csv columns: " + str( csv_dataframe.columns ) );
-        print( "built columns: " + str( built_dataframe.columns ) );
+        print( "test-resource columns: " + str( csv_dataframe.columns ) );
+        print( "downloaded columns: " + str( built_dataframe.columns ) );
         
         # assert that each column in the csv exists in the built dataframe
         built_keys = built_dataframe.columns
@@ -64,7 +63,6 @@ class BuildframeTest(TestCase):
                           which is present in test resources csv".format(csv_col_header))
 
             # assert that this column's content match between the csv and the built dataframe
-            print("testing consistency with csv values in column " + csv_col_header)
             csv_col_data = list(csv_dataframe[csv_col_header])
             built_col_data = list(built_dataframe[csv_col_header][:])
             if csv_col_header == "time":
