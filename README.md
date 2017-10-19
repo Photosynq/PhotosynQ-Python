@@ -53,7 +53,7 @@ ps.login( "john.doe@domain.com" )
 projectId = 1556
 info = ps.get_project_info(projectId)
 data = ps.get_project_data(projectId, processed_data=False) # Use raw data
-df = ps.buildProjectDataFrame(info, data)
+df = ps.build_project_dataframe(info, data)
 ps.logout()
 ```
 [DataFrame]: http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html "DataFrame"
