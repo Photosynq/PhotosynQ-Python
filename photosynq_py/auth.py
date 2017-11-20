@@ -9,7 +9,7 @@ import photosynq_py.globals as gvars
 import photosynq_py.getjson as getJson
 
 
-def login(u_email=None):
+def login(u_email=None, api_domain=gvars.DEFAULT_API_DOMAIN):
     """
     Login to the PhotosynQ API using your PhotosynQ account email address and password.
 
@@ -21,9 +21,11 @@ def login(u_email=None):
 
     :param u_email: (optional) the PhotosynQ account email address to use for logging in. If not
         provided, you will be prompted to enter an email address.
+    :param api_domain: (optional) the domain name for making queries. Default is "https://photosynq.org"
     :raises Exception: if you are already logged in, the given login information is invalid,
         or an I/O exception occurs
     """
+    gvars.API_DOMAIN = api_domain
     if gvars.AUTH_TOKEN is not None:
         raise Exception("already logged in as {0}. Use logout() first.".format(gvars.USER_EMAIL))
     if u_email is None:
@@ -32,7 +34,7 @@ def login(u_email=None):
         gvars.USER_EMAIL = u_email
     password = getpass.getpass("enter your PhotosynQ password for " + gvars.USER_EMAIL + ": ")
     req_data = {"user[email]":gvars.USER_EMAIL, "user[password]":password}
-    rsp = requests.post(gvars.API_URL + "/sign_in.json", data=req_data)
+    rsp = requests.post(gvars.get_api_url() + "/sign_in.json", data=req_data)
     if rsp.status_code == 500:
         raise Exception("invalid email/password combination")
     content = getJson.get_json_content(rsp)
@@ -53,7 +55,7 @@ def logout():
     """
     if gvars.AUTH_TOKEN is None:
         raise Exception("not logged in.")
-    rsp = requests.delete(gvars.API_URL + "/sign_out.json", data={"auth_token":gvars.AUTH_TOKEN})
+    rsp = requests.delete(gvars.get_api_url() + "/sign_out.json", data={"auth_token":gvars.AUTH_TOKEN})
     content = getJson.get_json_content(rsp)
     if "notice" in content.keys():
         print(content["notice"])
