@@ -55,9 +55,9 @@ def logout():
     """
     if gvars.AUTH_TOKEN is None:
         raise Exception("not logged in.")
-    rsp = requests.delete(gvars.get_api_url() + "/sign_out.json", data={"auth_token":gvars.AUTH_TOKEN})
-    content = getJson.get_json_content(rsp)
-    if "notice" in content.keys():
-        print(content["notice"])
+    # rsp = requests.delete(gvars.get_api_url() + "/sign_out.json", data={"auth_token":gvars.AUTH_TOKEN})
+    # content = getJson.get_json_content(rsp)
+    # if "notice" in content.keys():
+    #     print(content["notice"])
     gvars.AUTH_TOKEN = None
     gvars.USER_EMAIL = None
