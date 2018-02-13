@@ -157,11 +157,13 @@ def build_project_dataframe(project_info, project_data):
                 protocols["custom"]["count"] <- protocols["custom"]["count"] + 1
                 # protocols["custom"] = protocols["custom"] + 1
 
+        
 
     for prot in protocols.keys():
         protocols[prot]["parameters"] = list(set(protocols[prot]["parameters"]))
 
     spreadsheet = {}
+    num_result_rows_by_protocol = {}
         
     # Now that the preprocessing is done, we can start putting
     # the data into the data frame
@@ -183,10 +185,13 @@ def build_project_dataframe(project_info, project_data):
             if (new_key not in PARAMS_TO_EXCLUDE) and (new_key not in all_params):
                 all_params.append(new_key)
 
-        spreadsheet[prot] = DataFrame(columns=all_params)
+        spreadsheet[prot] = DataFrame(columns=all_params,index=numpy.arange(len(project_data)))
+        num_result_rows_by_protocol[prot] = len(project_data)
         
-    for measurement in project_data:
-
+        
+    for i in range(len(project_data)):
+        measurement = project_data[i]
+        
         if not "location" in measurement.keys():
             measurement["location"] = [None, None]
 
@@ -200,6 +205,10 @@ def build_project_dataframe(project_info, project_data):
                 protocolID = str(prot["protocol_id"])
             else:
                 protocolID = "custom"
+                
+            for key in prot.keys():
+                prot[encode_utf_8(key)] = prot.pop(key)
+                
             msmnt_dict = {}
             
             # if necessary, create a new dataframe for this protocolID
@@ -208,10 +217,10 @@ def build_project_dataframe(project_info, project_data):
                 for key in prot.keys():
                     if key not in cols:
                         cols.append( key )
-                spreadsheet[protocolID] = DataFrame(columns=cols)
+                spreadsheet[protocolID] = DataFrame(columns=cols,index=numpy.arange(len(project_data)))
+                num_result_rows_by_protocol[prot] = len(project_data)
 
             for param in spreadsheet[protocolID].columns:
-
                 if param == "datum_id":
                     msmnt_dict["datum_id"] = measurement["datum_id"]
 
@@ -256,8 +265,6 @@ def build_project_dataframe(project_info, project_data):
                     msmnt_dict[param] = answer
 
                 else:
-                    for key in prot.keys():
-                        prot[encode_utf_8(key)] = prot.pop(key)
                     if param in prot.keys():
                         value = prot[param]
                         if value == 'NA':
@@ -267,10 +274,14 @@ def build_project_dataframe(project_info, project_data):
                         msmnt_dict[param] = value
                         
             # append a row to the dataframe for this protocolID
-            spreadsheet[protocolID] = spreadsheet[protocolID].append( Series(msmnt_dict), ignore_index=True )
-            
+            spreadsheet[protocolID].iloc[i,:] = Series(msmnt_dict)
+            num_result_rows_by_protocol[protocolID] = i+1
 
     for protocol in list(spreadsheet.keys()):
+        
+        # trim unused rows from the dataframe if necessary
+        if( num_result_rows_by_protocol[protocol] < len(spreadsheet[protocol].index) ):
+            spreadsheet[protocol] = spreadsheet[protocol].iloc[:num_result_rows_by_protocol[protocol],:]
     
         # switch some parameters to human-readable names
         for parameter in spreadsheet[protocol].columns:
@@ -287,6 +298,7 @@ def build_project_dataframe(project_info, project_data):
             if new_key!=protocol:  
                 spreadsheet[new_key] = spreadsheet[protocol]
                 del spreadsheet[protocol]
+                
 
     return spreadsheet
 
