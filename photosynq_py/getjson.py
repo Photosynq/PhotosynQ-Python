@@ -33,6 +33,7 @@ def get_project_info(project_id):
     """
     if gvars.AUTH_TOKEN is None:
         raise Exception("not logged in.")
+    print( "downloading info for project id {0}...".format( project_id ) )
     info_url = gvars.get_api_url() + "/projects/{0}.json?user_email={1}&user_token={2}"
     req_url = info_url.format(str(project_id), gvars.USER_EMAIL, gvars.AUTH_TOKEN)    
     rsp = requests.get(req_url)
@@ -60,6 +61,7 @@ def get_project_data(project_id, processed_data=True, raw_traces=False):
     """
     if gvars.AUTH_TOKEN is None:
         raise Exception("not logged in.")
+    print( "downloading data for project id {0}...".format( project_id ) )
     data_url = gvars.get_api_url() + \
         "/projects/{0}/data.json?user_email={1}&user_token={2}&upd={3}&include_raw_data={4}"
     req_url = data_url.format(project_id, gvars.USER_EMAIL, gvars.AUTH_TOKEN, processed_data, raw_traces)
