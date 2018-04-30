@@ -200,7 +200,7 @@ def build_project_dataframe(project_info, project_data):
             protocols_for_measurement.append( measurement["custom"] )
         
         for prot in protocols_for_measurement:
-            
+
             if "protocol_id" in prot.keys():
                 protocolID = str(prot["protocol_id"])
             else:
@@ -218,7 +218,7 @@ def build_project_dataframe(project_info, project_data):
                     if key not in cols:
                         cols.append( key )
                 spreadsheet[protocolID] = DataFrame(columns=cols,index=numpy.arange(len(project_data)))
-                num_result_rows_by_protocol[prot] = len(project_data)
+                num_result_rows_by_protocol[protocolID] = len(project_data)
 
             for param in spreadsheet[protocolID].columns:
                 if param == "datum_id":
