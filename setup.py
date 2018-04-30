@@ -1,7 +1,7 @@
 from setuptools import setup
 setup(
     name = "photosynq_py",
-    version = "0.27",
+    version = "0.28",
     packages = ['photosynq_py'],
     test_suite = 'tests',
 
