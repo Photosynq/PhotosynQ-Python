@@ -274,7 +274,8 @@ def build_project_dataframe(project_info, project_data):
                         msmnt_dict[param] = value
                         
             # append a row to the dataframe for this protocolID
-            spreadsheet[protocolID].iloc[i,:] = Series(msmnt_dict)
+            for column,value in msmnt_dict.items():
+                spreadsheet[protocolID].loc[i,column] = value
             num_result_rows_by_protocol[protocolID] = i+1
 
     for protocol in list(spreadsheet.keys()):

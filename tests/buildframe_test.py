@@ -5,7 +5,7 @@ Test file corresponding with photosynq_py.buildframe
 from numbers import Number
 from datetime import datetime
 from unittest import TestCase
-from pandas import DataFrame
+import pandas as pd
 import json
 import numpy as np
 import photosynq_py as ps
@@ -29,8 +29,8 @@ class BuildframeTest(TestCase):
             RESOURCE_FOLDER + "1224_info_from_api")["project"]
         self.test_data = self.load_json(
             RESOURCE_FOLDER + "1224_data_from_api")["data"]
-        self.resource_dataframe = DataFrame.from_csv(
-            RESOURCE_FOLDER + "1224_csv_from_website.csv")
+        self.resource_dataframe = pd.read_csv(
+            RESOURCE_FOLDER + "1224_csv_from_website.csv", index_col=0)
 
     def test_build_project_dataframe(self):
         """
