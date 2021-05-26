@@ -206,7 +206,8 @@ def build_project_dataframe(project_info, project_data):
             else:
                 protocolID = "custom"
                 
-            for key in prot.keys():
+            old_keys = list(prot.keys())
+            for key in old_keys:
                 prot[encode_utf_8(key)] = prot.pop(key)
                 
             msmnt_dict = {}
