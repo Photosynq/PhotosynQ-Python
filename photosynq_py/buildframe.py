@@ -3,9 +3,10 @@ Creates accessible dataframes from Photosynq project info and project data json 
 """
 
 from datetime import datetime
-from pandas import DataFrame, Series
+from pandas import DataFrame, Series, read_json
 from numpy import nan
 import numpy
+import os
 
 import photosynq_py.getjson as getJson
 
@@ -316,3 +317,61 @@ def encode_utf_8(text):
     if(result.startswith("b'") and result.endswith("'")):
         result = result[2:-1]
     return result
+
+def build_notebook_dataframe(file):
+    """Import a PhotosynQ Notebook file
+
+    Import a file from the Desktop Application's notebook. Open the measurements you are interested
+    by checking the corresponding checkboxes in the notebook and select "Open Selected" from the "Action" menu.
+    Then click the ☰ symbol and select on "Save Data (json)" from the dropdown menu. The saved file can be
+    imported.
+
+    :param file: file and pathname to JSON file to be imported
+    :returns: dictionary with one value 
+    """
+
+    if file is None:
+        raise Exception("No file for import defined")
+
+    if not os.path.exists(file):
+        raise Exception("Provided file not found")
+
+    # Import JSON file
+    data = read_json(file)
+    
+    project_data = []
+    project_protocols = []
+    project_info_protocols = []
+    
+    # loop through each entry in the dataframe
+    # here only the data
+    for idx,row in data.iterrows():
+        # Create a dictionary with required parameters
+        # for the data import. 
+        obj = {}
+        obj['data'] = row.to_dict()
+        obj['data']['datum_id'] = idx
+        obj['data']['location'] = ['n/a','n/a'] # Location not supported
+        obj['data']['status'] = 'submitted'
+        obj['data']['user_id'] = 'Desktop App Notebook'
+        project_data.append(obj['data'])
+        
+        for sample in obj['data']['sample']:
+            if sample['protocol_id'] not in project_protocols:
+                project_protocols.append( sample['protocol_id'] )
+
+    # Create list with necessary protocol information
+    for idx, val in enumerate(project_protocols):
+        project_info_protocols.append({
+            "id": val,
+            "name": "Protocol_{0}".format(idx)
+        })
+            
+    # Build the minimum required project info for the DataFrame
+    project_info = {
+        "filters": [],
+        "protocols": project_info_protocols
+    }
+
+    # return dictionary with DataFrame(s)
+    return build_project_dataframe(project_info, project_data)

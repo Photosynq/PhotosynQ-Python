@@ -56,6 +56,13 @@ data = ps.get_project_data(projectId, processed_data=False) # Use raw data
 df = ps.build_project_dataframe(info, data)
 ps.logout()
 ```
+
+`build_notebook_dataframe` allows to build a DataFrame from the Desktop Application's notebook. Open the measurements you are interested by checking the corresponding checkboxes in the notebook and select "Open Selected" from the "Action" menu. Then click the ☰ symbol and select on "Save Data (json)" from the dropdown menu. The saved file can be imported.
+
+```py
+df = ps.build_notebook_dataframe('exported_notebook_file.json')
+```
+
 [DataFrame]: http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html "DataFrame"
 
 [PhotosynQ]: https://photosynq.org "PhotosynQ"

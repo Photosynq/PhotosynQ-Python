@@ -13,6 +13,6 @@ See the online readme for more information: https://github.com/Photosynq/Photosy
 
 from photosynq_py.auth import login, logout
 from photosynq_py.getjson import get_project_data, get_project_info
-from photosynq_py.buildframe import get_project_dataframe, build_project_dataframe, TIME_FORMAT
+from photosynq_py.buildframe import get_project_dataframe, build_project_dataframe, build_notebook_dataframe, TIME_FORMAT
 
 del auth, getjson, buildframe
