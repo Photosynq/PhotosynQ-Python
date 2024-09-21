@@ -6,8 +6,6 @@ import getpass
 import requests
 
 import photosynq_py.globals as gvars
-import photosynq_py.getjson as getJson
-
 
 def login(u_email=None, api_domain=gvars.DEFAULT_API_DOMAIN):
     """
