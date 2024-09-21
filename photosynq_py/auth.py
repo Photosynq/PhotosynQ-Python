@@ -27,20 +27,34 @@ def login(u_email=None, api_domain=gvars.DEFAULT_API_DOMAIN):
     """
     gvars.API_DOMAIN = api_domain
     if gvars.AUTH_TOKEN is not None:
-        raise Exception("already logged in as {0}. Use logout() first.".format(gvars.USER_EMAIL))
+        raise Exception("Already logged in as {0}. Use logout() first.".format(gvars.USER_EMAIL))
     if u_email is None:
-        gvars.USER_EMAIL = input("enter your PhotosynQ account email: ")
+        gvars.USER_EMAIL = input("Enter your PhotosynQ account email: ")
     else:
         gvars.USER_EMAIL = u_email
-    password = getpass.getpass("enter your PhotosynQ password for " + gvars.USER_EMAIL + ": ")
+    password = getpass.getpass("Enter your PhotosynQ password for " + gvars.USER_EMAIL + ": ")
     req_data = {"user[email]":gvars.USER_EMAIL, "user[password]":password}
-    rsp = requests.post(gvars.get_api_url() + "/sign_in.json", data=req_data)
-    if rsp.status_code == 500:
-        raise Exception("invalid email/password combination")
-    content = getJson.get_json_content(rsp)
-    if "error" in content.keys():
-        raise Exception(content["error"])
-    gvars.AUTH_TOKEN = content["user"]["auth_token"]
+
+    rsp = requests.post( gvars.get_api_url() + "/sign_in.json", 
+                    data = req_data,
+                    headers = {"user-agent": "photosynq/1.6.2"}
+                    )
+
+    if rsp.status_code != 200:
+        raise Exception("Server responeded with status {0} - {1}".format(rsp.status_code, rsp.reason))
+    
+    else:
+        content = rsp.json()
+    
+    if content["status"] == "success":
+        gvars.AUTH_TOKEN = content["user"]["auth_token"]
+        print("Logged in successfully as {0}".format(gvars.USER_EMAIL))
+    
+    elif content["status"] == "failed":
+        raise Exception(content["notice"])
+
+    else:
+        raise Exception("Unknown Status: {0}".format(content["status"]))
 
 
 def logout():
