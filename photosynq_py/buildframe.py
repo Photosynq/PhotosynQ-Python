@@ -272,7 +272,10 @@ def build_project_dataframe(project_info, project_data):
                         if value == 'NA':
                             value = nan
                         if isinstance(value, list):
-                            value = numpy.asarray(value)
+                            if param == "v_arrays":
+                                value = numpy.array(value, dtype=object)
+                            else:
+                                value = numpy.asarray(value)
                         msmnt_dict[param] = value
                         
             # append a row to the dataframe for this protocolID
