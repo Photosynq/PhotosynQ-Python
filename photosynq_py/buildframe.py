@@ -2,7 +2,7 @@
 Creates accessible dataframes from Photosynq project info and project data json structures.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from pandas import DataFrame, Series, read_json
 from numpy import nan
 import numpy
@@ -235,7 +235,9 @@ def build_project_dataframe(project_info, project_data):
                         
                     else:
                         unix_time = int(prot["time"])/1000
-                        time = datetime.utcfromtimestamp(unix_time).strftime(TIME_FORMAT)
+                        # time = datetime.utcfromtimestamp(unix_time).strftime(TIME_FORMAT)
+                        time = datetime.fromtimestamp(unix_time, tz=timezone.utc).strftime(TIME_FORMAT)
+
                         msmnt_dict["time"] = str(time)
 
                 elif param == "user_id":
@@ -272,7 +274,10 @@ def build_project_dataframe(project_info, project_data):
                         if value == 'NA':
                             value = nan
                         if isinstance(value, list):
-                            value = numpy.asarray(value)
+                            if param == "v_arrays":
+                                value = numpy.array(value, dtype=object)
+                            else:
+                                value = numpy.asarray(value)
                         msmnt_dict[param] = value
                         
             # append a row to the dataframe for this protocolID

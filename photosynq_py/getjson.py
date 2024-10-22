@@ -36,7 +36,7 @@ def get_project_info(project_id):
     print( "downloading info for project id {0}...".format( project_id ) )
     info_url = gvars.get_api_url() + "/projects/{0}.json?user_email={1}&user_token={2}"
     req_url = info_url.format(str(project_id), gvars.USER_EMAIL, gvars.AUTH_TOKEN)    
-    rsp = requests.get(req_url)
+    rsp = requests.get(req_url, headers = {"user-agent": "photosynq/1.6.2"})
     content = get_json_content(rsp)
     return content["project"]
 
@@ -65,7 +65,7 @@ def get_project_data(project_id, processed_data=True, raw_traces=False):
     data_url = gvars.get_api_url() + \
         "/projects/{0}/data.json?user_email={1}&user_token={2}&upd={3}&include_raw_data={4}"
     req_url = data_url.format(project_id, gvars.USER_EMAIL, gvars.AUTH_TOKEN, processed_data, raw_traces)
-    rsp = requests.get(req_url)
+    rsp = requests.get(req_url, headers = {"user-agent": "photosynq/1.6.2"})
     content = get_json_content(rsp)
     return content["data"]
     
